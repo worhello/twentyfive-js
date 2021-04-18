@@ -9,6 +9,10 @@
   "scripts": {
     "test": "mocha test/*.js"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/worhello/twentyfive-js.git"
+  },
   "description": "Twenty Five Card Game Library",
   "main": "index.js",
   "directories": {
