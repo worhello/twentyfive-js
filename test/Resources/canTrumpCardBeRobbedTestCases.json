@@ -1,0 +1,69 @@
+{
+    "testCases": [
+        {
+            "name": "no ace, not dealer, trumps is not ace",
+            "playerHand": [
+                { "suit": "spades", "value": "queen"},
+                { "suit": "hearts", "value": "queen"},
+                { "suit": "diamonds", "value": "nine"},
+                { "suit": "clubs", "value": "eight"},
+                { "suit": "diamonds", "value": "seven"}
+            ],
+            "isDealer": false,
+            "trumpCard": { "suit": "diamonds", "value": "two"},
+            "expectedResult": false
+        },
+        {
+            "name": "have ace, not dealer, trumps is not ace",
+            "playerHand": [
+                { "suit": "spades", "value": "queen"},
+                { "suit": "hearts", "value": "queen"},
+                { "suit": "diamonds", "value": "nine"},
+                { "suit": "clubs", "value": "eight"},
+                { "suit": "diamonds", "value": "ace"}
+            ],
+            "isDealer": false,
+            "trumpCard": { "suit": "diamonds", "value": "two"},
+            "expectedResult": true
+        },
+        {
+            "name": "have ace, is dealer, trumps is not ace",
+            "playerHand": [
+                { "suit": "spades", "value": "queen"},
+                { "suit": "hearts", "value": "queen"},
+                { "suit": "diamonds", "value": "nine"},
+                { "suit": "clubs", "value": "eight"},
+                { "suit": "diamonds", "value": "ace"}
+            ],
+            "isDealer": true,
+            "trumpCard": { "suit": "diamonds", "value": "two"},
+            "expectedResult": true
+        },
+        {
+            "name": "no ace, is dealer, trumps is not ace",
+            "playerHand": [
+                { "suit": "spades", "value": "queen"},
+                { "suit": "hearts", "value": "queen"},
+                { "suit": "diamonds", "value": "nine"},
+                { "suit": "clubs", "value": "eight"},
+                { "suit": "diamonds", "value": "seven"}
+            ],
+            "isDealer": true,
+            "trumpCard": { "suit": "diamonds", "value": "two"},
+            "expectedResult": false
+        },
+        {
+            "name": "is dealer, trumps is ace",
+            "playerHand": [
+                { "suit": "spades", "value": "queen"},
+                { "suit": "hearts", "value": "queen"},
+                { "suit": "diamonds", "value": "nine"},
+                { "suit": "clubs", "value": "eight"},
+                { "suit": "diamonds", "value": "seven"}
+            ],
+            "isDealer": true,
+            "trumpCard": { "suit": "diamonds", "value": "ace"},
+            "expectedResult": true
+        }
+    ]
+}

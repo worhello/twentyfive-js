@@ -1,0 +1,62 @@
+{
+    "testCases": [
+        {
+            "name": "no cards played - should play the first card",
+            "playedCards": [],
+            "cardOptions": [
+                { "suit": "clubs", "value": "queen" },
+                { "suit": "spades", "value": "queen"}
+            ],
+            "trumpCard": { "suit": "diamonds", "value": "two"},
+            "expectedCardIndex": 0
+        },
+        {
+            "name": "one card played - no cards of that suit and no trumps available - should return the first card",
+            "playedCards": [
+                { "suit": "hearts", "value": "two" }
+            ],
+            "cardOptions": [
+                { "suit": "spades", "value": "queen"}
+            ],
+            "trumpCard": { "suit": "diamonds", "value": "two"},
+            "expectedCardIndex": 0
+        },
+        {
+            "name": "one card played - one card of that suit and no trumps available - should return the card of played suit",
+            "playedCards": [
+                { "suit": "hearts", "value": "two" }
+            ],
+            "cardOptions": [
+                { "suit": "spades", "value": "queen"},
+                { "suit": "hearts", "value": "eight"}
+            ],
+            "trumpCard": { "suit": "diamonds", "value": "two"},
+            "expectedCardIndex": 1
+        },
+        {
+            "name": "one card played - no cards of that suit and one trump card available - should return the trump card",
+            "playedCards": [
+                { "suit": "hearts", "value": "two" }
+            ],
+            "cardOptions": [
+                { "suit": "spades", "value": "queen"},
+                { "suit": "diamonds", "value": "nine"}
+            ],
+            "trumpCard": { "suit": "diamonds", "value": "two"},
+            "expectedCardIndex": 1
+        },
+        {
+            "name": "one card played - played card is trumps - should return the only trump card",
+            "playedCards": [
+                { "suit": "diamonds", "value": "six" }
+            ],
+            "cardOptions": [
+                { "suit": "spades", "value": "queen"},
+                { "suit": "hearts", "value": "queen"},
+                { "suit": "diamonds", "value": "nine"}
+            ],
+            "trumpCard": { "suit": "diamonds", "value": "two"},
+            "expectedCardIndex": 2
+        }
+    ]
+}

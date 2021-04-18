@@ -1,0 +1,283 @@
+{
+    "testCases": [
+        {
+            "name": "neither of the cards are trumps - different suits - clubs first",
+            "playedCards": [
+                { "suit": "clubs", "value": "queen" },
+                { "suit": "spades", "value": "queen"}
+            ],
+            "trumpCard": { "suit": "diamonds", "value": "two"},
+            "expectedCardIndex": 0
+        },
+        {
+            "name": "neither of the cards are trumps - different suits - spades first",
+            "playedCards": [
+                { "suit": "spades", "value": "queen"},
+                { "suit": "clubs", "value": "queen" }
+            ],
+            "trumpCard": { "suit": "diamonds", "value": "two"},
+            "expectedCardIndex": 0
+        },
+        {
+            "name": "neither of the cards are trumps - different suits - hearts first",
+            "playedCards": [
+                { "suit": "hearts", "value": "queen"},
+                { "suit": "clubs", "value": "queen" }
+            ],
+            "trumpCard": { "suit": "diamonds", "value": "two"},
+            "expectedCardIndex": 0
+        },
+        {
+            "name": "neither of the cards are trumps - different suits - diamonds first",
+            "playedCards": [
+                { "suit": "diamonds", "value": "queen"},
+                { "suit": "clubs", "value": "queen" }
+            ],
+            "trumpCard": { "suit": "hearts", "value": "two"},
+            "expectedCardIndex": 0
+        },
+        {
+            "name": "neither of the cards are trumps - same suits - picture cards (higher value is better) - clubs",
+            "playedCards": [
+                { "suit": "clubs", "value": "queen"},
+                { "suit": "clubs", "value": "king" }
+            ],
+            "trumpCard": { "suit": "diamonds", "value": "two"},
+            "expectedCardIndex": 1
+        },
+        {
+            "name": "neither of the cards are trumps - same suits - picture cards (higher value is better) - spades",
+            "playedCards": [
+                { "suit": "spades", "value": "queen"},
+                { "suit": "spades", "value": "king" }
+            ],
+            "trumpCard": { "suit": "diamonds", "value": "two"},
+            "expectedCardIndex": 1
+        },
+        {
+            "name": "neither of the cards are trumps - same suits - picture cards (higher value is better) - hearts",
+            "playedCards": [
+                { "suit": "hearts", "value": "queen"},
+                { "suit": "hearts", "value": "king" }
+            ],
+            "trumpCard": { "suit": "diamonds", "value": "two"},
+            "expectedCardIndex": 1
+        },
+        {
+            "name": "neither of the cards are trumps - same suits - picture cards (higher value is better) - diamonds",
+            "playedCards": [
+                { "suit": "diamonds", "value": "queen"},
+                { "suit": "diamonds", "value": "king" }
+            ],
+            "trumpCard": { "suit": "hearts", "value": "two"},
+            "expectedCardIndex": 1
+        },
+        {
+            "name": "neither of the cards are trumps - same suits - number cards - clubs",
+            "playedCards": [
+                { "suit": "clubs", "value": "two"},
+                { "suit": "clubs", "value": "ten" }
+            ],
+            "trumpCard": { "suit": "hearts", "value": "two"},
+            "expectedCardIndex": 0
+        },
+        {
+            "name": "neither of the cards are trumps - same suits - number cards - spades",
+            "playedCards": [
+                { "suit": "spades", "value": "two"},
+                { "suit": "spades", "value": "ten" }
+            ],
+            "trumpCard": { "suit": "hearts", "value": "two"},
+            "expectedCardIndex": 0
+        },
+        {
+            "name": "neither of the cards are trumps - same suits - number cards - hearts",
+            "playedCards": [
+                { "suit": "hearts", "value": "two"},
+                { "suit": "hearts", "value": "ten" }
+            ],
+            "trumpCard": { "suit": "diamonds", "value": "two"},
+            "expectedCardIndex": 1
+        },
+        {
+            "name": "neither of the cards are trumps - same suits - number cards - diamonds",
+            "playedCards": [
+                { "suit": "diamonds", "value": "two"},
+                { "suit": "diamonds", "value": "ten" }
+            ],
+            "trumpCard": { "suit": "hearts", "value": "two"},
+            "expectedCardIndex": 1
+        },
+        {
+            "name": "neither of the cards are trumps - same suits - number vs picture cards - clubs",
+            "playedCards": [
+                { "suit": "clubs", "value": "three"},
+                { "suit": "clubs", "value": "queen" }
+            ],
+            "trumpCard": { "suit": "hearts", "value": "two"},
+            "expectedCardIndex": 1
+        },
+        {
+            "name": "neither of the cards are trumps - same suits - number vs picture cards - spades",
+            "playedCards": [
+                { "suit": "spades", "value": "three"},
+                { "suit": "spades", "value": "queen" }
+            ],
+            "trumpCard": { "suit": "hearts", "value": "two"},
+            "expectedCardIndex": 1
+        },
+        {
+            "name": "neither of the cards are trumps - same suits - number vs picture cards - hearts",
+            "playedCards": [
+                { "suit": "hearts", "value": "three"},
+                { "suit": "hearts", "value": "queen" }
+            ],
+            "trumpCard": { "suit": "diamonds", "value": "two"},
+            "expectedCardIndex": 1
+        },
+        {
+            "name": "neither of the cards are trumps - same suits - number vs picture cards - diamonds",
+            "playedCards": [
+                { "suit": "diamonds", "value": "three"},
+                { "suit": "diamonds", "value": "queen" }
+            ],
+            "trumpCard": { "suit": "hearts", "value": "two"},
+            "expectedCardIndex": 1
+        },
+        {
+            "name": "neither of the cards are trumps - same suits - number vs ace - diamonds",
+            "playedCards": [
+                { "suit": "diamonds", "value": "ten" },
+                { "suit": "diamonds", "value": "ace"}
+            ],
+            "trumpCard": { "suit": "hearts", "value": "two"},
+            "expectedCardIndex": 0
+        },
+        {
+            "name": "first card played is trumps - clubs are trumps",
+            "playedCards": [
+                { "suit": "clubs", "value": "queen"},
+                { "suit": "spades", "value": "queen" }
+            ],
+            "trumpCard": { "suit": "clubs", "value": "two"},
+            "expectedCardIndex": 0
+        },
+        {
+            "name": "first card played is trumps - spades are trumps",
+            "playedCards": [
+                { "suit": "spades", "value": "queen" },
+                { "suit": "clubs", "value": "queen"}
+            ],
+            "trumpCard": { "suit": "spades", "value": "two"},
+            "expectedCardIndex": 0
+        },
+        {
+            "name": "first card played is trumps - hearts are trumps",
+            "playedCards": [
+                { "suit": "hearts", "value": "queen" },
+                { "suit": "clubs", "value": "queen"}
+            ],
+            "trumpCard": { "suit": "hearts", "value": "two"},
+            "expectedCardIndex": 0
+        },
+        {
+            "name": "first card played is trumps - diamonds are trumps",
+            "playedCards": [
+                { "suit": "diamonds", "value": "queen" },
+                { "suit": "clubs", "value": "queen"}
+            ],
+            "trumpCard": { "suit": "diamonds", "value": "two"},
+            "expectedCardIndex": 0
+        },
+        {
+            "name": "second card played is trumps - clubs are trumps",
+            "playedCards": [
+                { "suit": "spades", "value": "queen" },
+                { "suit": "clubs", "value": "queen"}
+            ],
+            "trumpCard": { "suit": "clubs", "value": "two"},
+            "expectedCardIndex": 1
+        },
+        {
+            "name": "second card played is trumps - spades are trumps",
+            "playedCards": [
+                { "suit": "clubs", "value": "queen"},
+                { "suit": "spades", "value": "queen" }
+            ],
+            "trumpCard": { "suit": "spades", "value": "two"},
+            "expectedCardIndex": 1
+        },
+        {
+            "name": "second card played is trumps - hearts are trumps",
+            "playedCards": [
+                { "suit": "spades", "value": "queen" },
+                { "suit": "hearts", "value": "queen"}
+            ],
+            "trumpCard": { "suit": "hearts", "value": "two"},
+            "expectedCardIndex": 1
+        },
+        {
+            "name": "second card played is trumps - diamonds are trumps",
+            "playedCards": [
+                { "suit": "spades", "value": "queen" },
+                { "suit": "diamonds", "value": "queen"}
+            ],
+            "trumpCard": { "suit": "diamonds", "value": "two"},
+            "expectedCardIndex": 1
+        },
+        {
+            "name": "both cards are trumps - one card is one of the special cases - ace of hearts",
+            "playedCards": [
+                { "suit": "diamonds", "value": "queen" },
+                { "suit": "hearts", "value": "ace"}
+            ],
+            "trumpCard": { "suit": "diamonds", "value": "ten"},
+            "expectedCardIndex": 1
+        },
+        {
+            "name": "both cards are trumps - one card is one of the special cases - jack of trumps",
+            "playedCards": [
+                { "suit": "diamonds", "value": "queen" },
+                { "suit": "diamonds", "value": "jack"}
+            ],
+            "trumpCard": { "suit": "diamonds", "value": "ten"},
+            "expectedCardIndex": 1
+        },
+        {
+            "name": "both cards are trumps - one card is one of the special cases - five of trumps",
+            "playedCards": [
+                { "suit": "diamonds", "value": "queen" },
+                { "suit": "diamonds", "value": "five"}
+            ],
+            "trumpCard": { "suit": "diamonds", "value": "ten"},
+            "expectedCardIndex": 1
+        },
+        {
+            "name": "both cards are trumps - both cards are special cases - ace of hearts vs jack of trumps",
+            "playedCards": [
+                { "suit": "hearts", "value": "ace" },
+                { "suit": "diamonds", "value": "jack"}
+            ],
+            "trumpCard": { "suit": "diamonds", "value": "ten"},
+            "expectedCardIndex": 1
+        },
+        {
+            "name": "both cards are trumps - both cards are special cases - jack of trumps vs five of trumps",
+            "playedCards": [
+                { "suit": "diamonds", "value": "jack" },
+                { "suit": "diamonds", "value": "five"}
+            ],
+            "trumpCard": { "suit": "diamonds", "value": "ten"},
+            "expectedCardIndex": 1
+        },
+        {
+            "name": "both cards are trumps - both cards are normal cases - ace of trumps vs ten of trumps",
+            "playedCards": [
+                { "suit": "diamonds", "value": "ten" },
+                { "suit": "diamonds", "value": "ace"}
+            ],
+            "trumpCard": { "suit": "diamonds", "value": "ten"},
+            "expectedCardIndex": 1
+        }
+    ]
+}

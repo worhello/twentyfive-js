@@ -1,0 +1,93 @@
+{
+    "testCases": [
+        {
+            "name": "self player plays first",
+            "playerHand": [
+                { "suit": "spades", "value": "queen" },
+                { "suit": "hearts", "value": "queen" },
+                { "suit": "diamonds", "value": "nine" },
+                { "suit": "clubs", "value": "eight" },
+                { "suit": "diamonds", "value": "seven" }
+            ],
+            "trumpCard": { "suit": "clubs", "value": "two" },
+            "playedCards": [],
+            "expectedEnabledStates": [ true, true, true, true, true ]
+        },
+        {
+            "name": "one card played - is trumps - have trumps",
+            "playerHand": [
+                { "suit": "spades", "value": "queen" },
+                { "suit": "hearts", "value": "queen" },
+                { "suit": "diamonds", "value": "nine" },
+                { "suit": "clubs", "value": "eight" },
+                { "suit": "diamonds", "value": "seven" }
+            ],
+            "trumpCard": { "suit": "clubs", "value": "two" },
+            "playedCards": [ 
+                { "suit": "clubs", "value": "three" }
+             ],
+            "expectedEnabledStates": [ false, false, false, true, false ]
+        },
+        {
+            "name": "one card played - is not trumps - have played suit + trumps",
+            "playerHand": [
+                { "suit": "spades", "value": "queen" },
+                { "suit": "hearts", "value": "queen" },
+                { "suit": "diamonds", "value": "nine" },
+                { "suit": "clubs", "value": "eight" },
+                { "suit": "diamonds", "value": "seven" }
+            ],
+            "trumpCard": { "suit": "diamonds", "value": "two" },
+            "playedCards": [ 
+                { "suit": "clubs", "value": "three" }
+             ],
+            "expectedEnabledStates": [ false, false, true, true, true ]
+        },
+        {
+            "name": "one card played - is not trumps - have trumps but no played suit",
+            "playerHand": [
+                { "suit": "spades", "value": "queen" },
+                { "suit": "hearts", "value": "queen" },
+                { "suit": "diamonds", "value": "nine" },
+                { "suit": "spades", "value": "eight" },
+                { "suit": "diamonds", "value": "seven" }
+            ],
+            "trumpCard": { "suit": "diamonds", "value": "two" },
+            "playedCards": [ 
+                { "suit": "clubs", "value": "three" }
+             ],
+            "expectedEnabledStates": [ false, false, true, false, true ]
+        },
+        {
+            "name": "one card played - is not trumps - have no trumps or played suit",
+            "playerHand": [
+                { "suit": "spades", "value": "queen" },
+                { "suit": "spades", "value": "queen" },
+                { "suit": "diamonds", "value": "nine" },
+                { "suit": "spades", "value": "eight" },
+                { "suit": "diamonds", "value": "seven" }
+            ],
+            "trumpCard": { "suit": "hearts", "value": "two" },
+            "playedCards": [ 
+                { "suit": "clubs", "value": "three" }
+             ],
+            "expectedEnabledStates": [ true, true, true, true, true ]
+        },
+        {
+            "name": "two cards played - different suits - second is trumps - have trumps + played suit",
+            "playerHand": [
+                { "suit": "spades", "value": "queen" },
+                { "suit": "hearts", "value": "queen" },
+                { "suit": "diamonds", "value": "nine" },
+                { "suit": "clubs", "value": "eight" },
+                { "suit": "diamonds", "value": "seven" }
+            ],
+            "trumpCard": { "suit": "diamonds", "value": "two" },
+            "playedCards": [ 
+                { "suit": "clubs", "value": "three" },
+                { "suit": "diamonds", "value": "three" }
+             ],
+            "expectedEnabledStates": [ false, false, true, true, true ]
+        }
+    ]
+}

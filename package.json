@@ -1,0 +1,18 @@
+{
+  "name": "twentyfive",
+  "version": "0.1.0",
+  "license": "MIT",
+  "dependencies": {
+    "assert": "latest",
+    "mocha": "^8.3.2"
+  },
+  "scripts": {
+    "test": "mocha test/*.js"
+  },
+  "description": "Twenty Five Card Game Library",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "author": ""
+}
