@@ -599,6 +599,7 @@ class Game {
 (function () {
     let e = {};
     e.Game = Game;
+    e.GameState = GameState;
     
     if (typeof module !== 'undefined' && module.exports != null) {
         module.exports = e;
