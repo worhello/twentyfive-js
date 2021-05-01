@@ -1,5 +1,14 @@
 "use strict";
 
+const GameState = Object.freeze({
+    notStarted: 0,
+    waitingForPlayers: 1,
+    readyToPlay: 2,
+    inProgress: 3,
+    dealingNewCards: 4,
+    gameFinished: 5
+});
+
 function getPlayerModule() {
     if (typeof module !== 'undefined' && module.exports != null) {
         let m = require("./player");
@@ -62,7 +71,7 @@ function buildAiPlayer() {
 }
 
 class Game {
-    constructor(id, numberOfPlayers, notifyOnePlayerFunc) {
+    constructor(id, numberOfPlayers, notifyOnePlayerFunc, notifyStateChangeFunc) {
         this.id = id;
         this.numberOfPlayers = numberOfPlayers;
         this.notifyOnePlayerFunc = notifyOnePlayerFunc;
@@ -72,6 +81,27 @@ class Game {
         this.roundPlayerAndCards = [];
         this.currentPlayerIndex = 0;
         this.currentWinningPlayerAndCard = {};
+        this.currentState = GameState.notStarted;
+        this.notifyStateChangeFunc = notifyStateChangeFunc;
+    }
+
+    init() {
+        this.moveToState(GameState.waitingForPlayers);
+    }
+
+    moveToState(newState) {
+        if (this.currentState != newState) {
+            this.currentState = newState;
+            if (this.notifyStateChangeFunc) {
+                this.notifyStateChangeFunc(this.currentState);
+            }
+        }
+    }
+
+    notifyIfReadyToPlay() {
+        if (this.players.length == this.numberOfPlayers) {
+            this.moveToState(GameState.readyToPlay);
+        }
     }
 
     addPlayer(player, notify = true) {
@@ -79,6 +109,7 @@ class Game {
         if (notify) {
             this.notifyPlayersListChanged();
         }
+        this.notifyIfReadyToPlay();
     }
 
     removePlayer(player) {
@@ -90,6 +121,7 @@ class Game {
 
         this.players.splice(playerIndex, 1);
         this.notifyPlayersListChanged();
+        this.notifyIfReadyToPlay();
     }
 
     fillWithAis() {
@@ -199,6 +231,7 @@ class Game {
         this.players.sort(function() {
             return .5 - Math.random();
         });
+        this.moveToState(GameState.inProgress);
         this.startRound();
     }
 
@@ -427,9 +460,11 @@ class Game {
         
         let orderedPlayers = this.getSortedListOfPlayers();
         if (winnerWithHighestScore.score >= 25) {
+            this.moveToState(GameState.gameFinished);
             this.notifyAllRoundFinished(orderedPlayers, "gameFinished");
         }
         else if (this.mustDealNewCards()) {
+            this.moveToState(GameState.dealingNewCards);
             this.markAllPlayersWaitingForNextRound();
             this.notifyAllRoundFinished(orderedPlayers, "roundFinished");
         }
