@@ -5,7 +5,7 @@ const GameState = Object.freeze({
     waitingForPlayers: 1,
     readyToPlay: 2,
     inProgress: 3,
-    dealingNewCards: 4,
+    waitingToDealNewCards: 4,
     gameFinished: 5
 });
 
@@ -460,13 +460,13 @@ class Game {
         
         let orderedPlayers = this.getSortedListOfPlayers();
         if (winnerWithHighestScore.score >= 25) {
-            this.moveToState(GameState.gameFinished);
             this.notifyAllRoundFinished(orderedPlayers, "gameFinished");
+            this.moveToState(GameState.gameFinished);
         }
         else if (this.mustDealNewCards()) {
-            this.moveToState(GameState.dealingNewCards);
             this.markAllPlayersWaitingForNextRound();
             this.notifyAllRoundFinished(orderedPlayers, "roundFinished");
+            this.moveToState(GameState.waitingToDealNewCards);
         }
         else {
             this.notifyAllRoundFinished(orderedPlayers, "scoresUpdated");
