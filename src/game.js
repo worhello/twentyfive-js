@@ -2,8 +2,8 @@
 
 function getPlayerModule() {
     if (typeof module !== 'undefined' && module.exports != null) {
-        let playerModule = require("./player");
-        return playerModule;
+        let m = require("./player");
+        return m;
     }
     else {
         return window.playerModule;
@@ -12,8 +12,8 @@ function getPlayerModule() {
 
 function getDeckModule() {
     if (typeof module !== 'undefined' && module.exports != null) {
-        let playerModule = require("./deck");
-        return playerModule;
+        let m = require("./deck");
+        return m;
     }
     else {
         return window.deck;
@@ -22,11 +22,21 @@ function getDeckModule() {
 
 function getTrumpCardModule() {
     if (typeof module !== 'undefined' && module.exports != null) {
-        let playerModule = require("./trumpCard");
-        return playerModule;
+        let m = require("./trumpCard");
+        return m;
     }
     else {
         return window.trumpCard;
+    }
+}
+
+function getGameLogicModule() {
+    if (typeof module !== 'undefined' && module.exports != null) {
+        let m = require("./gameLogic");
+        return m;
+    }
+    else {
+        return window.gameLogic;
     }
 }
 
@@ -115,7 +125,7 @@ class Game {
     }
 
     playerCanRobTrumpCard(player) {
-        return canTrumpCardBeRobbed(player.cards, player.isDealer, this.trumpCard);
+        return getGameLogicModule().canTrumpCardBeRobbed(player.cards, player.isDealer, this.trumpCard);
     }
 
     aiAttemptRob(player) {
@@ -208,7 +218,7 @@ class Game {
         if (this.mustDealNewCards()) {
             this.rotateDealer();
             this.dealAllPlayerCards();
-            this.trumpCard = new TrumpCard();
+            this.trumpCard = new (getTrumpCardModule()).TrumpCard();
             this.trumpCard.card = this.drawCard();
 
             this.notifyAllGameInitialState();
@@ -288,7 +298,7 @@ class Game {
     resetDeckIfNeeded() {
         let numCardsNeeded = (this.players.length * 5) + 1;
         if (this.deck.cards.length < numCardsNeeded) {
-            this.deck = new Deck();
+            this.deck = new (getDeckModule()).Deck();
         }
     }
 
@@ -383,7 +393,7 @@ class Game {
 
     evaluateRoundEnd() {
         let playedCards = this.getPlayedCards();
-        let winningCard = getWinningCard(this.trumpCard, playedCards);
+        let winningCard = getGameLogicModule().getWinningCard(this.trumpCard, playedCards);
         let winningPlayer = this.roundPlayerAndCards.find(pAC => pAC.card == winningCard).player;
         let winningPlayerId = winningPlayer.id;
 
@@ -448,8 +458,9 @@ class Game {
     }
 
     updateCurrentWinningCard(currentMove) {
-        let currentWinningCard = getWinningCard(this.trumpCard, this.getPlayedCards());
-        if (!this.currentWinningPlayerAndCard.card || !isSameCard(this.currentWinningPlayerAndCard.card, currentWinningCard)) { // is new card
+        let gameLogic = getGameLogicModule();
+        let currentWinningCard = gameLogic.getWinningCard(this.trumpCard, this.getPlayedCards());
+        if (!this.currentWinningPlayerAndCard.card || !gameLogic.isSameCard(this.currentWinningPlayerAndCard.card, currentWinningCard)) { // is new card
             this.currentWinningPlayerAndCard = currentMove;
             return true;
         }
