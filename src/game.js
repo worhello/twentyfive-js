@@ -82,7 +82,13 @@ class Game {
     }
 
     removePlayer(player) {
-        // TODO - remove player from list
+        let playerIndex = this.players.findIndex((p) => p.id == player.id);
+        if (playerIndex == -1) {
+            // log error?
+            return;
+        }
+
+        this.players.splice(playerIndex, 1);
         this.notifyPlayersListChanged();
     }
 
@@ -391,6 +397,18 @@ class Game {
         }
     }
 
+    markAllPlayersWaitingForNextRound() {
+        for (var player of this.players) {
+            if (!player.isAi) {
+                player.isReadyForNextRound = false;
+            }
+            else {
+                // AIs are always "ready"
+                player.isReadyForNextRound = true;
+            }
+        }
+    }
+
     evaluateRoundEnd() {
         let playedCards = this.getPlayedCards();
         let winningCard = getGameLogicModule().getWinningCard(this.trumpCard, playedCards);
@@ -406,11 +424,13 @@ class Game {
             }
         });
 
+        
         let orderedPlayers = this.getSortedListOfPlayers();
         if (winnerWithHighestScore.score >= 25) {
             this.notifyAllRoundFinished(orderedPlayers, "gameFinished");
         }
         else if (this.mustDealNewCards()) {
+            this.markAllPlayersWaitingForNextRound();
             this.notifyAllRoundFinished(orderedPlayers, "roundFinished");
         }
         else {
@@ -487,10 +507,9 @@ class Game {
     }
     
     robTrumpCard(userId, droppedCardDetails) {
-        // TODO
         let player = this.findPlayerById(userId);
         if (!player) {
-            // do something
+            // TODO do something
             return
         }
 
@@ -499,16 +518,38 @@ class Game {
     }
 
     skipRobTrumpCard(userId) {
-        // TODO validation??
+        let player = this.findPlayerById(userId);
+        if (!player) {
+            // TODO do something
+            return
+        }
         this.startRound();
     }
 
-    markPlayerReadyForNextRound(userId) {
-        // TODO - put in some logic here to make sure all players are ready
-        // before starting next round
+    allPlayersReadyForNextRound() {
+        var ready = true;
+        for (let player of this.players) {
+            if (!player.isAi && !player.isReadyForNextRound) {
+                ready = false;
+                break;
+            }
+        }
 
-        // for now just go straight through
-        this.startNextRound();
+        return ready;
+    }
+
+    markPlayerReadyForNextRound(userId) {
+        let player = this.findPlayerById(userId);
+        if (!player) {
+            // TODO do something
+            return
+        }
+
+        player.isReadyForNextRound = true;
+
+        if (this.allPlayersReadyForNextRound()) {
+            this.startNextRound();
+        }
     }
 
     findPlayerById(playerId) {
