@@ -2,57 +2,60 @@
 
 let tf = require('..');
 
-let gameLogic = tf.gameLogic;//require('../gameLogic.js');
+let gameLogic = tf.gameLogic;
+let card = tf.Card;
+
 let gameLogicTestCases = require('./Resources/gameLogicTestCases.json');
 let getBestCardTestCases = require('./Resources/getBestCardFromHandTestCases.json');
 let canTrumpCardBeRobbedTestCases = require('./Resources/canTrumpCardBeRobbedTestCases.json');
 let updatePlayerCardsEnabledStateTestCases = require('./Resources/updatePlayerCardsEnabledStateTestCases.json');
+
 let assert = require('assert');
 
 function buildSuitFromString(suitAsString) {
     if (suitAsString == "clubs") {
-        return gameLogic.CardSuits.clubs;
+        return tf.CardSuits.clubs;
     } else if (suitAsString == "spades") {
-        return gameLogic.CardSuits.spades;
+        return tf.CardSuits.spades;
     } else if (suitAsString == "diamonds") {
-        return gameLogic.CardSuits.diamonds;
+        return tf.CardSuits.diamonds;
     } else {
-        return gameLogic.CardSuits.hearts;
+        return tf.CardSuits.hearts;
     }
 }
 
 function buildValueFromString(valueAsString) {
     if (valueAsString == "ace") {
-        return gameLogic.CardValues.ace;
+        return tf.CardValues.ace;
     } else if (valueAsString == "two") {
-        return gameLogic.CardValues.two;
+        return tf.CardValues.two;
     } else  if (valueAsString == "three") {
-        return gameLogic.CardValues.three;
+        return tf.CardValues.three;
     } else  if (valueAsString == "four") {
-        return gameLogic.CardValues.four;
+        return tf.CardValues.four;
     } else  if (valueAsString == "five") {
-        return gameLogic.CardValues.five;
+        return tf.CardValues.five;
     } else  if (valueAsString == "six") {
-        return gameLogic.CardValues.six;
+        return tf.CardValues.six;
     } else  if (valueAsString == "seven") {
-        return gameLogic.CardValues.seven;
+        return tf.CardValues.seven;
     } else  if (valueAsString == "eight") {
-        return gameLogic.CardValues.eight;
+        return tf.CardValues.eight;
     } else  if (valueAsString == "nine") {
-        return gameLogic.CardValues.nine;
+        return tf.CardValues.nine;
     } else  if (valueAsString == "ten") {
-        return gameLogic.CardValues.ten;
+        return tf.CardValues.ten;
     } else  if (valueAsString == "jack") {
-        return gameLogic.CardValues.jack;
+        return tf.CardValues.jack;
     } else  if (valueAsString == "queen") {
-        return gameLogic.CardValues.queen;
+        return tf.CardValues.queen;
     } else  if (valueAsString == "king") {
-        return gameLogic.CardValues.king;
+        return tf.CardValues.king;
     }
 }
 
 function buildDeckCardFromJSON(cardAsJson) {
-    return new gameLogic.Card(buildSuitFromString(cardAsJson.suit), buildValueFromString(cardAsJson.value));
+    return new tf.Card(buildSuitFromString(cardAsJson.suit), buildValueFromString(cardAsJson.value));
 }
 
 function buildDeckCardsFromJSON(cardsAsJsonArray) {
@@ -63,8 +66,6 @@ function buildDeckCardsFromJSON(cardsAsJsonArray) {
     return cards;
 }
 
-// this is only needed because I want the same test cases across two languages
-// (yes I like making things extra complicated for no reason!)
 describe('parse test JSON test', function() {
     let testJson = {
         "testCases": [
@@ -97,16 +98,16 @@ describe('parse test JSON test', function() {
         assert.strictEqual(2, playedCards.length);
 
         let playedCard0 = playedCards[0];
-        assert.strictEqual(gameLogic.CardSuits.clubs, playedCard0.suit);
-        assert.strictEqual(gameLogic.CardValues.queen, playedCard0.value);
+        assert.strictEqual(tf.CardSuits.clubs, playedCard0.suit);
+        assert.strictEqual(tf.CardValues.queen, playedCard0.value);
 
         let playedCard1 = playedCards[1];
-        assert.strictEqual(gameLogic.CardSuits.spades, playedCard1.suit);
-        assert.strictEqual(gameLogic.CardValues.queen, playedCard1.value);
+        assert.strictEqual(tf.CardSuits.spades, playedCard1.suit);
+        assert.strictEqual(tf.CardValues.queen, playedCard1.value);
 
         let trumpCard = buildDeckCardFromJSON(testCase.trumpCard);
-        assert.strictEqual(gameLogic.CardSuits.diamonds, trumpCard.suit);
-        assert.strictEqual(gameLogic.CardValues.two, trumpCard.value);
+        assert.strictEqual(tf.CardSuits.diamonds, trumpCard.suit);
+        assert.strictEqual(tf.CardValues.two, trumpCard.value);
     });
 });
 
@@ -114,7 +115,7 @@ describe('Game Logic - using JSON', function() {
     for (let testCase of gameLogicTestCases.testCases) {
         it(testCase.name, function() {
             let playedCards = buildDeckCardsFromJSON(testCase.playedCards);
-            var trumpCard = new gameLogic.TrumpCard();
+            var trumpCard = new tf.TrumpCard();
             trumpCard.card = buildDeckCardFromJSON(testCase.trumpCard);
             let expectedCard = playedCards[testCase.expectedCardIndex];
             let actualCard = gameLogic.getWinningCard(trumpCard, playedCards);
@@ -127,14 +128,14 @@ describe('Game Logic - using JSON', function() {
 describe('Game Logic', function() {
     describe('getWinningCard', function() {
         it('should return a default Card if no cards passed in', function() {
-            let trumpCard = new gameLogic.TrumpCard();
-            let cards = [ new gameLogic.Card() ];
+            let trumpCard = new tf.TrumpCard();
+            let cards = [ new tf.Card() ];
             assert.ok(gameLogic.getWinningCard(trumpCard, cards));
         });
 
         it('should return the first card if a single card passed in', function() {
-            let trumpCard = new gameLogic.TrumpCard();
-            let cards = [ new gameLogic.Card() ];
+            let trumpCard = new tf.TrumpCard();
+            let cards = [ new tf.Card() ];
             let expectedCard = cards[0];
             let actualCard = gameLogic.getWinningCard(trumpCard, cards);
             assert.strictEqual(expectedCard.suit, actualCard.suit);
@@ -148,7 +149,7 @@ describe('Game Logic - getBestCardFromOptions - using JSON', function() {
         it(testCase.name, function() {
             let playedCards = buildDeckCardsFromJSON(testCase.playedCards);
             let cardOptions = buildDeckCardsFromJSON(testCase.cardOptions);
-            var trumpCard = new gameLogic.TrumpCard();
+            var trumpCard = new tf.TrumpCard();
             trumpCard.card = buildDeckCardFromJSON(testCase.trumpCard);
             let expectedCard = cardOptions[testCase.expectedCardIndex];
             let actualCard = gameLogic.getBestCardFromOptions(cardOptions, trumpCard, playedCards);
@@ -167,7 +168,7 @@ describe('Game Logic (Client only)', function() {
         });
         describe('one card available', function() {
             it('should return the first card', function() {
-                let cardOptions = [ new gameLogic.Card() ];
+                let cardOptions = [ new tf.Card() ];
                 let expectedCard = cardOptions[0];
                 let actualCard = gameLogic.getBestCardFromOptions(cardOptions);
                 assert.strictEqual(expectedCard.suit, actualCard.suit);
@@ -182,7 +183,7 @@ describe('Game Logic - canTrumpCardBeRobbed - using JSON', function() {
         it(testCase.name, function() {
             let playerHand = buildDeckCardsFromJSON(testCase.playerHand);
             let isDealer = testCase.isDealer;
-            var trumpCard = new gameLogic.TrumpCard();
+            var trumpCard = new tf.TrumpCard();
             trumpCard.card = buildDeckCardFromJSON(testCase.trumpCard);
             let expectedResult = testCase.expectedResult;
             let actualResult = gameLogic.canTrumpCardBeRobbed(playerHand, isDealer, trumpCard);
@@ -196,7 +197,7 @@ describe('Game Logic - updatePlayerCardsEnabledState - using JSON', function() {
         it(testCase.name, function() {
             var playerHand = buildDeckCardsFromJSON(testCase.playerHand);
             let playedCards = buildDeckCardsFromJSON(testCase.playedCards);
-            var trumpCard = new gameLogic.TrumpCard();
+            var trumpCard = new tf.TrumpCard();
             trumpCard.card = buildDeckCardFromJSON(testCase.trumpCard);
             let expectedEnabledStates = testCase.expectedEnabledStates;
             gameLogic.updatePlayerCardsEnabledState(playedCards, playerHand, trumpCard);

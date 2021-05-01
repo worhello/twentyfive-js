@@ -2,18 +2,16 @@
 
 let tf = require('..');
 
-let gameLogic = tf.gameLogic;
-
 let assert = require('assert');
 
 describe('Player Tests', function() {
     let player = new tf.Player("player name");
     player.cards = [
-        new gameLogic.Card(gameLogic.CardSuits.clubs, gameLogic.CardValues.eight),
-        new gameLogic.Card(gameLogic.CardSuits.diamonds, gameLogic.CardValues.eight),
-        new gameLogic.Card(gameLogic.CardSuits.spades, gameLogic.CardValues.eight),
-        new gameLogic.Card(gameLogic.CardSuits.hearts, gameLogic.CardValues.eight),
-        new gameLogic.Card(gameLogic.CardSuits.hearts, gameLogic.CardValues.seven)
+        new tf.Card(tf.CardSuits.clubs, tf.CardValues.eight),
+        new tf.Card(tf.CardSuits.diamonds, tf.CardValues.eight),
+        new tf.Card(tf.CardSuits.spades, tf.CardValues.eight),
+        new tf.Card(tf.CardSuits.hearts, tf.CardValues.eight),
+        new tf.Card(tf.CardSuits.hearts, tf.CardValues.seven)
     ];
 
     it("check that internal player details are correct", function() {
@@ -32,8 +30,8 @@ describe('Player Tests', function() {
 
         it("card the player does have", function() {
             let playedCard = player.playCard("7_of_hearts");
-            assert.strictEqual(playedCard.suit, gameLogic.CardSuits.hearts);
-            assert.strictEqual(playedCard.value, gameLogic.CardValues.seven);
+            assert.strictEqual(playedCard.suit, tf.CardSuits.hearts);
+            assert.strictEqual(playedCard.value, tf.CardValues.seven);
         });
     });
 });
