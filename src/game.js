@@ -6,7 +6,8 @@ const GameState = Object.freeze({
     readyToPlay: 2,
     inProgress: 3,
     waitingToDealNewCards: 4,
-    gameFinished: 5
+    waitingForPlayerToRobTrumpCard: 5,
+    gameFinished: 6
 });
 
 function getPlayerModule() {
@@ -231,7 +232,6 @@ class Game {
         this.players.sort(function() {
             return .5 - Math.random();
         });
-        this.moveToState(GameState.inProgress);
         this.startRound();
     }
 
@@ -252,6 +252,7 @@ class Game {
     }
 
     startRound() {
+        this.moveToState(GameState.inProgress);
         this.resetDeckIfNeeded();
         this.roundPlayerAndCards = [];
         if (this.mustDealNewCards()) {
@@ -259,13 +260,14 @@ class Game {
             this.dealAllPlayerCards();
             this.trumpCard = new (getTrumpCardModule()).TrumpCard();
             this.trumpCard.card = this.drawCard();
-
+            
             this.notifyAllGameInitialState();
-
+            
             let trumpCardCanBeRobbed = this.checkIfAnyPlayerCanRobAndNotify();
             if (trumpCardCanBeRobbed) {
                 // waiting for the player who can rob to do something
                 // the resulting player actions will handle starting the round
+                this.moveToState(GameState.waitingForPlayerToRobTrumpCard);
                 return;
             }
         }
