@@ -1,30 +1,30 @@
 "use strict";
 
-function getCardModule() {
-    if (typeof module !== 'undefined' && module.exports != null) {
-        let card = require("./card");
-        return card;
-    }
-    else {
-        return window.card;
-    }
-}
-
-function buildDeck() {
-    var cards = [];
-    let cardModule = getCardModule();
-    for (let [_, s] of Object.entries(cardModule.CardSuits)) {
-        for (let [_1, v] of Object.entries(cardModule.CardValues)) {
-            cards.push(new cardModule.Card(s, v));
-        }
-    }
-    return cards;
-}
-
 class Deck {
     constructor() {
-        this.cards = buildDeck();
+        this.cards = Deck.buildDeck();
         Deck.shuffleDeck(this.cards);
+    }
+
+    static getCardModule() {
+        if (typeof module !== 'undefined' && module.exports != null) {
+            let card = require("./card");
+            return card;
+        }
+        else {
+            return window.card;
+        }
+    }
+
+    static buildDeck() {
+        var cards = [];
+        let cardModule = Deck.getCardModule();
+        for (let [_, s] of Object.entries(cardModule.CardSuits)) {
+            for (let [_1, v] of Object.entries(cardModule.CardValues)) {
+                cards.push(new cardModule.Card(s, v));
+            }
+        }
+        return cards;
     }
 
     static shuffleDeck(cards) {
