@@ -10,43 +10,43 @@ function getCardModule() {
     }
 }
 
-let CardSuits = getCardModule().CardSuits;
-let CardValues = getCardModule().CardValues;
+let suits = getCardModule().CardSuits;
+let values = getCardModule().CardValues;
 
 const RedNormalCardsRanking = Object.freeze([
-    CardValues.ace,
-    CardValues.two,
-    CardValues.three,
-    CardValues.four,
-    CardValues.five,
-    CardValues.six,
-    CardValues.seven,
-    CardValues.eight,
-    CardValues.nine,
-    CardValues.ten,
-    CardValues.jack,
-    CardValues.queen,
-    CardValues.king
+    values.ace,
+    values.two,
+    values.three,
+    values.four,
+    values.five,
+    values.six,
+    values.seven,
+    values.eight,
+    values.nine,
+    values.ten,
+    values.jack,
+    values.queen,
+    values.king
 ]);
 
 const BlackNormalCardsRanking = Object.freeze([
-    CardValues.ten,
-    CardValues.nine,
-    CardValues.eight,
-    CardValues.seven,
-    CardValues.six,
-    CardValues.five,
-    CardValues.four,
-    CardValues.three,
-    CardValues.two,
-    CardValues.ace,
-    CardValues.jack,
-    CardValues.queen,
-    CardValues.king
+    values.ten,
+    values.nine,
+    values.eight,
+    values.seven,
+    values.six,
+    values.five,
+    values.four,
+    values.three,
+    values.two,
+    values.ace,
+    values.jack,
+    values.queen,
+    values.king
 ]);
 
 function isRedCard(c) {
-    return c.suit == CardSuits.hearts || c.suit == CardSuits.diamonds;
+    return c.suit == suits.hearts || c.suit == suits.diamonds;
 }
 
 function isTrumpSuit(cardA, trumpCard) {
@@ -54,19 +54,19 @@ function isTrumpSuit(cardA, trumpCard) {
 }
 
 function isAceCard(cardA) {
-    return cardA.value == CardValues.ace;
+    return cardA.value == values.ace;
 }
 
 function isAceOfHearts(cardA) {
-    return cardA.suit == CardSuits.hearts && isAceCard(cardA);
+    return cardA.suit == suits.hearts && isAceCard(cardA);
 }
 
 function isFiveOfTrumps(cardA, trumpCard) {
-    return isTrumpSuit(cardA, trumpCard) && cardA.value == CardValues.five;
+    return isTrumpSuit(cardA, trumpCard) && cardA.value == values.five;
 }
 
 function isJackOfTrumps(cardA, trumpCard) {
-    return isTrumpSuit(cardA, trumpCard) && cardA.value == CardValues.jack;
+    return isTrumpSuit(cardA, trumpCard) && cardA.value == values.jack;
 }
 
 function isAceOfTrumps(cardA, trumpCard) {

@@ -10,46 +10,6 @@ const GameState = Object.freeze({
     gameFinished: 6
 });
 
-function getPlayerModule() {
-    if (typeof module !== 'undefined' && module.exports != null) {
-        let m = require("./player");
-        return m;
-    }
-    else {
-        return window.playerModule;
-    }
-}
-
-function getDeckModule() {
-    if (typeof module !== 'undefined' && module.exports != null) {
-        let m = require("./deck");
-        return m;
-    }
-    else {
-        return window.deck;
-    }
-}
-
-function getTrumpCardModule() {
-    if (typeof module !== 'undefined' && module.exports != null) {
-        let m = require("./trumpCard");
-        return m;
-    }
-    else {
-        return window.trumpCard;
-    }
-}
-
-function getGameLogicModule() {
-    if (typeof module !== 'undefined' && module.exports != null) {
-        let m = require("./gameLogic");
-        return m;
-    }
-    else {
-        return window.gameLogic;
-    }
-}
-
 function buildPlayerDetailsJson(players) {
     var out = [];
     for (var i = 0; i < players.length; i++) {
@@ -63,57 +23,105 @@ function buildPlayerDetailsJson(players) {
     return out;
 }
 
-var aiPlayerNum = 1;
-function buildAiPlayer() {
-    var p = new (getPlayerModule()).Player("AI_Player" + aiPlayerNum);
-    p.isAi = true;
-    aiPlayerNum++;
-    return p;
-}
-
 class Game {
-    constructor(id, numberOfPlayers, notifyOnePlayerFunc, notifyStateChangeFunc) {
+    constructor(id, numberOfPlayers, notifyOnePlayerFunc, notifyStateChangeFunc, disableReneging, isTutorial) {
         this.id = id;
         this.numberOfPlayers = numberOfPlayers;
         this.notifyOnePlayerFunc = notifyOnePlayerFunc;
         this.players = [];
-        this.deck = new (getDeckModule()).Deck();
-        this.trumpCard = new (getTrumpCardModule()).TrumpCard();
+        this.deck = new (this.getDeckModule()).Deck();
+        this.trumpCard = new (this.getTrumpCardModule()).TrumpCard();
         this.roundPlayerAndCards = [];
         this.currentPlayerIndex = 0;
         this.currentWinningPlayerAndCard = {};
         this.currentState = GameState.notStarted;
         this.notifyStateChangeFunc = notifyStateChangeFunc;
+        this.renegingDisabled = disableReneging;
+        this.tutorialManager = null;
+        if (isTutorial) {
+            this.tutorialManager = new (this.getTutorialGameManagerModule()).TutorialGameManager();
+        }
+        console.log(this.tutorialManager);
     }
 
-    init() {
-        this.moveToState(GameState.waitingForPlayers);
+    getPlayerModule() {
+        if (typeof module !== 'undefined' && module.exports != null) {
+            let m = require("./player");
+            return m;
+        }
+        else {
+            return window.playerModule;
+        }
+    }
+    
+    getDeckModule() {
+        if (typeof module !== 'undefined' && module.exports != null) {
+            let m = require("./deck");
+            return m;
+        }
+        else {
+            return window.deck;
+        }
+    }
+    
+    getTrumpCardModule() {
+        if (typeof module !== 'undefined' && module.exports != null) {
+            let m = require("./trumpCard");
+            return m;
+        }
+        else {
+            return window.trumpCard;
+        }
+    }
+    
+    getGameLogicModule() {
+        if (typeof module !== 'undefined' && module.exports != null) {
+            let m = require("./gameLogic");
+            return m;
+        }
+        else {
+            return window.gameLogic;
+        }
     }
 
-    moveToState(newState) {
+    getTutorialGameManagerModule() {
+        if (typeof module !== 'undefined' && module.exports != null) {
+            let m = require("./tutorialGameManager");
+            return m;
+        }
+        else {
+            return window.tutorialGameManager;
+        }
+    }
+
+    async init() {
+        await this.moveToState(GameState.waitingForPlayers);
+    }
+
+    async moveToState(newState) {
         if (this.currentState != newState) {
             this.currentState = newState;
             if (this.notifyStateChangeFunc) {
-                this.notifyStateChangeFunc(this.currentState);
+                await this.notifyStateChangeFunc(this.currentState);
             }
         }
     }
 
-    notifyIfReadyToPlay() {
+    async notifyIfReadyToPlay() {
         if (this.players.length == this.numberOfPlayers) {
-            this.moveToState(GameState.readyToPlay);
+            await this.moveToState(GameState.readyToPlay);
         }
     }
 
-    addPlayer(player, notify = true) {
+    async addPlayer(player, notify = true) {
         this.players.push(player);
         if (notify) {
-            this.notifyPlayersListChanged();
+            await this.notifyPlayersListChanged();
         }
-        this.notifyIfReadyToPlay();
+        await this.notifyIfReadyToPlay();
     }
 
-    removePlayer(player) {
+    async removePlayer(player) {
         let playerIndex = this.players.findIndex((p) => p.id == player.id);
         if (playerIndex == -1) {
             // log error?
@@ -121,32 +129,32 @@ class Game {
         }
 
         this.players.splice(playerIndex, 1);
-        this.notifyPlayersListChanged();
-        this.notifyIfReadyToPlay();
+        await this.notifyPlayersListChanged();
+        await this.notifyIfReadyToPlay();
     }
 
-    fillWithAis() {
+    async fillWithAis() {
         let numAiPlayersNeeded = this.numberOfPlayers - this.players.length;
         for (var i = 0; i < numAiPlayersNeeded; i++) {
-            this.addPlayer(buildAiPlayer(), i == (numAiPlayersNeeded - 1)); // only notify once
+            await this.addPlayer((this.getPlayerModule()).buildAiPlayer(), i == (numAiPlayersNeeded - 1)); // only notify once
         }
     }
 
-    notifyPlayersListChanged() {
+    async notifyPlayersListChanged() {
         let playersDetails = buildPlayerDetailsJson(this.players);
         let data = {
             type: "playerListChanged",
             playersDetails: playersDetails,
             needMorePlayers: this.needsMorePlayers()
         }
-        this.notifyAllPlayers(data);
+        await this.notifyAllPlayers(data);
     }
 
-    notifyAllPlayers(data) {
+    async notifyAllPlayers(data) {
         for (var i = 0; i < this.players.length; i++) {
             let p = this.players[i];
             if (p.isAi === false) {
-                this.notifyOnePlayerFunc(p.id, data);
+                await this.notifyOnePlayerFunc(p.id, data);
             }
         }
     }
@@ -155,35 +163,35 @@ class Game {
         return this.numberOfPlayers != this.players.length;
     }
 
-    robCard(player, droppedCardName) {
+    async robCard(player, droppedCardName) {
         player.playCard(droppedCardName);
         player.cards.push(this.trumpCard.card);
         this.trumpCard.steal(player);
 
-        this.startRound();
+        await this.startRound();
     }
 
     playerCanRobTrumpCard(player) {
-        return getGameLogicModule().canTrumpCardBeRobbed(player.cards, player.isDealer, this.trumpCard);
+        return this.getGameLogicModule().canTrumpCardBeRobbed(player.cards, player.isDealer, this.trumpCard);
     }
 
-    aiAttemptRob(player) {
+    async aiAttemptRob(player) {
         let canRob = this.playerCanRobTrumpCard(player);
-        if (canRob === false) {
+        if (canRob == false) {
             return;
         }
 
         let willRob = player.aiWillRobCard();
-        if (willRob === false) {
+        if (willRob == false) {
             return;
         }
 
-        this.robCard(player, player.aiSelectCardToDropForRob(this.trumpCard));
+        await this.robCard(player, player.aiSelectCardToDropForRob(this.trumpCard));
     }
 
-    shouldNotifyPlayerForRobbing(player) {
+    async shouldNotifyPlayerForRobbing(player) {
         if (player.isAi) {
-            this.aiAttemptRob(player);
+            await this.aiAttemptRob(player);
         }
         else if (this.playerCanRobTrumpCard(player)) {
             return true;
@@ -191,24 +199,24 @@ class Game {
         return false;
     }
 
-    notifyOnePlayerRobTrumpCardAvailable(p) {
+    async notifyOnePlayerRobTrumpCardAvailable(p) {
         let data = {
             type: "robTrumpCardAvailable",
             userId: p.id,
             trumpCard: this.trumpCard
         }
-        this.notifyOnePlayerFunc(p.id, data);
+        await this.notifyOnePlayerFunc(p.id, data);
     }
 
-    checkIfAnyPlayerCanRobAndNotify() {
+    async checkIfAnyPlayerCanRobAndNotify() {
         // sequence is explained in the rules
 
         // first check dealer
         let dealerIndex = this.players.findIndex(p => p.isDealer === true);
         let dealer = this.players[dealerIndex];
-        let dealerNeedsNotification = this.shouldNotifyPlayerForRobbing(dealer);
+        let dealerNeedsNotification = await this.shouldNotifyPlayerForRobbing(dealer);
         if (dealerNeedsNotification) {
-            this.notifyOnePlayerRobTrumpCardAvailable(dealer);
+            await this.notifyOnePlayerRobTrumpCardAvailable(dealer);
             return true;
         }
 
@@ -218,9 +226,9 @@ class Game {
                 continue; // already handled above
             }
 
-            let playerNeedsNotification = this.shouldNotifyPlayerForRobbing(player);
+            let playerNeedsNotification = await this.shouldNotifyPlayerForRobbing(player);
             if (playerNeedsNotification) {
-                this.notifyOnePlayerRobTrumpCardAvailable(player);
+                await this.notifyOnePlayerRobTrumpCardAvailable(player);
                 return true;
             }
         }
@@ -228,11 +236,11 @@ class Game {
         return false;
     }
 
-    start() {
+    async start() {
         this.players.sort(function() {
             return .5 - Math.random();
         });
-        this.startRound();
+        await this.startRound();
     }
 
     hack_alwaysSelfPlayerCanRobDrawCard() {
@@ -251,33 +259,36 @@ class Game {
         console.log("failed to find any aces in the deck??");
     }
 
-    startRound() {
-        this.moveToState(GameState.inProgress);
+    async startRound() {
+        await this.moveToState(GameState.inProgress);
         this.resetDeckIfNeeded();
         this.roundPlayerAndCards = [];
+        var canRobThisRound = false;
         if (this.mustDealNewCards()) {
             this.rotateDealer();
             this.dealAllPlayerCards();
-            this.trumpCard = new (getTrumpCardModule()).TrumpCard();
+            this.trumpCard = new (this.getTrumpCardModule()).TrumpCard();
             this.trumpCard.card = this.drawCard();
             
-            this.notifyAllGameInitialState();
-            
-            let trumpCardCanBeRobbed = this.checkIfAnyPlayerCanRobAndNotify();
+            canRobThisRound = true;
+        }
+
+        await this.notifyAllGameInitialState();
+
+        if (canRobThisRound == true) {
+            let trumpCardCanBeRobbed = await this.checkIfAnyPlayerCanRobAndNotify();
             if (trumpCardCanBeRobbed) {
                 // waiting for the player who can rob to do something
                 // the resulting player actions will handle starting the round
-                this.moveToState(GameState.waitingForPlayerToRobTrumpCard);
+                await this.moveToState(GameState.waitingForPlayerToRobTrumpCard);
                 return;
             }
         }
 
-        this.notifyAllGameInitialState();
-
         this.requestNextPlayerMove();
     }
 
-    notifyAllGameInitialState() {
+    async notifyAllGameInitialState() {
         var data = {
             type: "gameInitialState",
             gameId: this.gameId,
@@ -295,24 +306,33 @@ class Game {
             if (p.isAi == false) {
                 data.playerDetails.userId = p.id;
                 data.playerDetails.cards = p.cards;
-                this.notifyOnePlayerFunc(p.id, data);
+                await this.notifyOnePlayerFunc(p.id, data);
             }
         }
     }
 
-    requestNextPlayerMove() {
+    async requestNextPlayerMove() {
         let player = this.players[this.currentPlayerIndex];
-        this.notifyAllCurrentPlayerMovePending(player);
+        await this.notifyAllCurrentPlayerMovePending(player);
         if (player.isAi === true) {
             // Add delay for AIs so the gameplay feels a little more natural
             let gameMgr = this;
             setTimeout(function() {
                 let playedCards = gameMgr.getPlayedCards();
-                gameMgr.playCard(player, player.aiPlayCard(playedCards, gameMgr.trumpCard));
+                let nextCard = gameMgr.tutorialManager ? gameMgr.tutorialManager.playNextAiCard(player)
+                                                       : player.aiPlayCard(playedCards, gameMgr.trumpCard);
+                gameMgr.playCard(player, nextCard);
             }, 500);
         }
         else {
-            this.notifyOnePlayerMoveRequested(player);
+            if (this.tutorialManager) {
+                this.tutorialManager.enableCardsForPlay(player.cards);
+            }
+            else if (this.disableReneging) {
+                let playedCards = this.getPlayedCards();
+                this.getGameLogicModule().updatePlayerCardsEnabledState(playedCards, player.cards, this.trumpCard);
+            }
+            await this.notifyOnePlayerMoveRequested(player);
         }
     }
 
@@ -320,26 +340,30 @@ class Game {
         return this.roundPlayerAndCards.map(pAC => pAC.card);
     }
 
-    notifyAllCurrentPlayerMovePending(player) {
+    async notifyAllCurrentPlayerMovePending(player) {
         let data = {
             type: "currentPlayerMovePending",
             userId: player.id
         }
-        this.notifyAllPlayers(data);
+        await this.notifyAllPlayers(data);
     }
 
-    notifyOnePlayerMoveRequested(p) {
+    async notifyOnePlayerMoveRequested(p) {
         let data = {
             type: "playerMoveRequested",
             userId: p.id
         }
-        this.notifyOnePlayerFunc(p.id, data);
+        await this.notifyOnePlayerFunc(p.id, data);
     }
 
     resetDeckIfNeeded() {
         let numCardsNeeded = (this.players.length * 5) + 1;
         if (this.deck.cards.length < numCardsNeeded) {
-            this.deck = new (getDeckModule()).Deck();
+            this.deck = new (this.getDeckModule()).Deck();
+        }
+
+        if (this.tutorialManager) {
+            this.tutorialManager.sortDeckIfNeeded(this.deck.cards);
         }
     }
 
@@ -355,14 +379,19 @@ class Game {
     }
 
     rotateDealer() {
-        var dealerIndex = this.players.findIndex(p => p.isDealer == true);
-        if (dealerIndex == -1) {
-            dealerIndex = this.players.length - 2;
-        } else {
-            this.players[dealerIndex].isDealer = false;
+        if (this.tutorialManager) {
+            dealerIndex = this.tutorialManager.getDealerIndex(this.getSelfPlayerIndex());
         }
-
-        dealerIndex = (dealerIndex + 1) % this.players.length;
+        else {
+            var dealerIndex = this.players.findIndex(p => p.isDealer == true);
+            if (dealerIndex == -1) {
+                dealerIndex = this.players.length - 2;
+            } else {
+                this.players[dealerIndex].isDealer = false;
+            }
+            
+            dealerIndex = (dealerIndex + 1) % this.players.length;
+        }
         this.players[dealerIndex].isDealer = true;
     }
 
@@ -414,13 +443,13 @@ class Game {
         }
     }
 
-    playCard(player, playedCard) {
+    async playCard(player, playedCard) {
         let currentMove = { "player": player, "card": playedCard };
         this.roundPlayerAndCards.push(currentMove);
         let isNewWinningCard = this.updateCurrentWinningCard(currentMove);
-        this.notifyAllCardPlayed(player, playedCard, isNewWinningCard);
+        await this.notifyAllCardPlayed(player, playedCard, isNewWinningCard);
 
-        this.notifyOneCardsUpdated(player);
+        await this.notifyOneCardsUpdated(player);
 
         this.currentPlayerIndex++; // if it's ==
         if (this.currentPlayerIndex == this.players.length) {
@@ -428,7 +457,7 @@ class Game {
             setTimeout(function() { gameMgr.evaluateRoundEnd(); }, 1000);
         }
         else {
-            this.requestNextPlayerMove();
+            await this.requestNextPlayerMove();
         }
     }
 
@@ -444,9 +473,17 @@ class Game {
         }
     }
 
-    evaluateRoundEnd() {
+    async notifyAllTutorialRoundEnded(continueFunc) {
+        let data = {
+            type: "tutorialRoundEnded",
+            continueFunc: continueFunc
+        };
+        await this.notifyAllPlayers(data);
+    }
+
+    async evaluateRoundEnd() {
         let playedCards = this.getPlayedCards();
-        let winningCard = getGameLogicModule().getWinningCard(this.trumpCard, playedCards);
+        let winningCard = this.getGameLogicModule().getWinningCard(this.trumpCard, playedCards);
         let winningPlayer = this.roundPlayerAndCards.find(pAC => pAC.card == winningCard).player;
         let winningPlayerId = winningPlayer.id;
 
@@ -459,20 +496,28 @@ class Game {
             }
         });
 
-        
-        let orderedPlayers = this.getSortedListOfPlayers();
-        if (winnerWithHighestScore.score >= 25) {
-            this.notifyAllRoundFinished(orderedPlayers, "gameFinished");
-            this.moveToState(GameState.gameFinished);
+        let continueFunc = async function() {
+            let orderedPlayers = this.getSortedListOfPlayers();
+            if (winnerWithHighestScore.score >= 25) {
+                await this.notifyAllRoundFinished(orderedPlayers, "gameFinished");
+                await this.moveToState(GameState.gameFinished);
+            }
+            else if (this.mustDealNewCards()) {
+                this.markAllPlayersWaitingForNextRound();
+                await this.notifyAllRoundFinished(orderedPlayers, "roundFinished");
+                await this.moveToState(GameState.waitingToDealNewCards);
+            }
+            else {
+                await this.notifyAllRoundFinished(orderedPlayers, "scoresUpdated");
+                await this.startNextRound(winningPlayerId);
+            }
         }
-        else if (this.mustDealNewCards()) {
-            this.markAllPlayersWaitingForNextRound();
-            this.notifyAllRoundFinished(orderedPlayers, "roundFinished");
-            this.moveToState(GameState.waitingToDealNewCards);
+
+        if (this.tutorialManager) {
+            await notifyAllTutorialRoundEnded(continueFunc);
         }
         else {
-            this.notifyAllRoundFinished(orderedPlayers, "scoresUpdated");
-            this.startNextRound(winningPlayerId);
+            await continueFunc();
         }
     }
 
@@ -491,10 +536,10 @@ class Game {
         return playersCopy;
     }
 
-    startNextRound(startingPlayerId) {
+    async startNextRound(startingPlayerId) {
         this.currentPlayerIndex = 0;
         this.rotatePlayersArray(startingPlayerId);
-        this.startRound();
+        await this.startRound();
     }
 
     rotatePlayersArray(lastRoundWinningPlayerId) {
@@ -505,17 +550,17 @@ class Game {
         this.players = firstHalf.concat(secondHalf);
     }
 
-    notifyAllRoundFinished(orderedPlayers, eventType) {
+    async notifyAllRoundFinished(orderedPlayers, eventType) {
         let data = {
             type: eventType,
             gameId: this.gameId,
             orderedPlayers: orderedPlayers
         }
-        this.notifyAllPlayers(data);
+        await this.notifyAllPlayers(data);
     }
 
     updateCurrentWinningCard(currentMove) {
-        let gameLogic = getGameLogicModule();
+        let gameLogic = this.getGameLogicModule();
         let currentWinningCard = gameLogic.getWinningCard(this.trumpCard, this.getPlayedCards());
         if (!this.currentWinningPlayerAndCard.card || !gameLogic.isSameCard(this.currentWinningPlayerAndCard.card, currentWinningCard)) { // is new card
             this.currentWinningPlayerAndCard = currentMove;
@@ -524,26 +569,26 @@ class Game {
         return false;
     }
 
-    notifyAllCardPlayed(player, playedCard, isNewWinningCard) {
+    async notifyAllCardPlayed(player, playedCard, isNewWinningCard) {
         let data = {
             type: "cardPlayed",
             userId: player.id,
             playedCard: playedCard,
             isNewWinningCard: isNewWinningCard
         }
-        this.notifyAllPlayers(data);
+        await this.notifyAllPlayers(data);
     }
 
-    notifyOneCardsUpdated(player) {
+    async notifyOneCardsUpdated(player) {
         let data = {
             type: "cardsUpdated",
             userId: player.id,
             cards: player.cards
         }
-        this.notifyOnePlayerFunc(player.id, data);
+        await this.notifyOnePlayerFunc(player.id, data);
     }
     
-    robTrumpCard(userId, droppedCardDetails) {
+    async robTrumpCard(userId, droppedCardDetails) {
         let player = this.findPlayerById(userId);
         if (!player) {
             // TODO do something
@@ -551,16 +596,16 @@ class Game {
         }
 
         let droppedCardName = droppedCardDetails.cardName;
-        this.robCard(player, droppedCardName);
+        await this.robCard(player, droppedCardName);
     }
 
-    skipRobTrumpCard(userId) {
+    async skipRobTrumpCard(userId) {
         let player = this.findPlayerById(userId);
         if (!player) {
             // TODO do something
             return
         }
-        this.startRound();
+        await this.startRound();
     }
 
     allPlayersReadyForNextRound() {
@@ -575,15 +620,15 @@ class Game {
         return ready;
     }
 
-    notifyAllPlayerReadyForNextRoundChanged(readyPlayerIds) {
+    async notifyAllPlayerReadyForNextRoundChanged(readyPlayerIds) {
         let data = {
             type: "playersReadyForNextRoundChanged",
             readyPlayerIds: readyPlayerIds
         }
-        this.notifyAllPlayers(data);
+        await this.notifyAllPlayers(data);
     }
 
-    markPlayerReadyForNextRound(userId) {
+    async markPlayerReadyForNextRound(userId) {
         let player = this.findPlayerById(userId);
         if (!player) {
             // TODO do something
@@ -593,12 +638,12 @@ class Game {
         player.isReadyForNextRound = true;
 
         if (this.allPlayersReadyForNextRound()) {
-            this.startNextRound();
+            this.startNextRound();// fix me
         }
         else {
             let readyPlayers = this.players.filter((p) => p.isReadyForNextRound == true);
             let readyPlayerIds = readyPlayers.map((p) => p.id);
-            this.notifyAllPlayerReadyForNextRoundChanged(readyPlayerIds);
+            await this.notifyAllPlayerReadyForNextRoundChanged(readyPlayerIds);
         }
     }
 

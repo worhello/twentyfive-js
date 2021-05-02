@@ -57,9 +57,18 @@ class Player {
     }
 }
 
+var aiPlayerNum = 1;
+function buildAiPlayer() {
+    var p = new Player("AI_Player" + aiPlayerNum);
+    p.isAi = true;
+    aiPlayerNum++;
+    return p;
+}
+
 (function () {
     let playerExports = {};
     playerExports.Player = Player;
+    playerExports.buildAiPlayer = buildAiPlayer;
     
     if (typeof module !== 'undefined' && module.exports != null) {
         module.exports = playerExports;
