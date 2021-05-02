@@ -496,20 +496,21 @@ class Game {
             }
         });
 
+        let game = this;
         let continueFunc = async function() {
-            let orderedPlayers = this.getSortedListOfPlayers();
+            let orderedPlayers = game.getSortedListOfPlayers();
             if (winnerWithHighestScore.score >= 25) {
-                await this.notifyAllRoundFinished(orderedPlayers, "gameFinished");
-                await this.moveToState(GameState.gameFinished);
+                await game.notifyAllRoundFinished(orderedPlayers, "gameFinished");
+                await game.moveToState(GameState.gameFinished);
             }
-            else if (this.mustDealNewCards()) {
-                this.markAllPlayersWaitingForNextRound();
-                await this.notifyAllRoundFinished(orderedPlayers, "roundFinished");
-                await this.moveToState(GameState.waitingToDealNewCards);
+            else if (game.mustDealNewCards()) {
+                game.markAllPlayersWaitingForNextRound();
+                await game.notifyAllRoundFinished(orderedPlayers, "roundFinished");
+                await game.moveToState(GameState.waitingToDealNewCards);
             }
             else {
-                await this.notifyAllRoundFinished(orderedPlayers, "scoresUpdated");
-                await this.startNextRound(winningPlayerId);
+                await game.notifyAllRoundFinished(orderedPlayers, "scoresUpdated");
+                await game.startNextRound(winningPlayerId);
             }
         }
 
