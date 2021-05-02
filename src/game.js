@@ -575,6 +575,14 @@ class Game {
         return ready;
     }
 
+    notifyAllPlayerReadyForNextRoundChanged(readyPlayerIds) {
+        let data = {
+            type: "playersReadyForNextRoundChanged",
+            readyPlayerIds: readyPlayerIds
+        }
+        this.notifyAllPlayers(data);
+    }
+
     markPlayerReadyForNextRound(userId) {
         let player = this.findPlayerById(userId);
         if (!player) {
@@ -586,6 +594,11 @@ class Game {
 
         if (this.allPlayersReadyForNextRound()) {
             this.startNextRound();
+        }
+        else {
+            let readyPlayers = this.players.filter((p) => p.isReadyForNextRound == true);
+            let readyPlayerIds = readyPlayers.map((p) => p.id);
+            this.notifyAllPlayerReadyForNextRoundChanged(readyPlayerIds);
         }
     }
 
