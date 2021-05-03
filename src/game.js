@@ -296,6 +296,18 @@ class Game {
         }
     }
 
+    updatePlayerCardsEnabled(player) {
+        if (this.disableReneging) {
+            let playedCards = this.getPlayedCards();
+            this.getGameLogicModule().updatePlayerCardsEnabledState(playedCards, player.cards, this.trumpCard);
+        }
+    }
+
+    playerBestCardAi(player) {
+        let playedCards = this.getPlayedCards();
+        return player.aiPlayCard(playedCards, this.trumpCard);
+    }
+
     async requestNextPlayerMove() {
         let player = this.players[this.currentPlayerIndex];
         await this.notifyAllCurrentPlayerMovePending(player);
@@ -303,15 +315,11 @@ class Game {
             // Add delay for AIs so the gameplay feels a little more natural
             let gameMgr = this;
             setTimeout(function() {
-                let playedCards = gameMgr.getPlayedCards();
-                gameMgr.playCard(player, player.aiPlayCard(playedCards, gameMgr.trumpCard));
+                gameMgr.playCard(player, gameMgr.playerBestCardAi(player));
             }, 500);
         }
         else {
-            if (this.disableReneging) {
-                let playedCards = this.getPlayedCards();
-                this.getGameLogicModule().updatePlayerCardsEnabledState(playedCards, player.cards, this.trumpCard);
-            }
+            this.updatePlayerCardsEnabled(player);
             await this.notifyOnePlayerMoveRequested(player);
         }
     }
@@ -404,8 +412,6 @@ class Game {
     playCardWithId(userId, cardDetails) {
         let player = this.findPlayerById(userId);
         if (!player) {
-            // do something
-            console.log(userId);
             return;
         }
         let playedCard = player.playCard(cardDetails.cardName);
