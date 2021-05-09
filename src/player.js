@@ -1,5 +1,49 @@
 
 
+// using a class as a way of namespacing
+class PlayerLogic
+{
+    static getGameLogicModule() {
+        if (typeof module !== 'undefined' && module.exports != null) {
+            let gameLogic = require("./gameLogic");
+            return gameLogic;
+        }
+        else {
+            return window.gameLogic;
+        }
+    }
+
+    static playCard(player, cardName) {
+        let cardIndex = player.cards.findIndex(card => card.cardName == cardName);
+        if (cardIndex > -1) {
+            let playedCard = player.cards[cardIndex];
+            player.cards.splice(cardIndex, 1);
+            return playedCard;
+        }
+        return this.cards[0];
+    }
+
+    static aiPlayCard(player, playedCards, trumpCard) {
+        let cardToPlay = PlayerLogic.getGameLogicModule().getBestCardFromOptions(player.cards, trumpCard, playedCards);
+        PlayerLogic.playCard(player, cardToPlay.cardName);
+        return cardToPlay;
+    }
+
+    static aiWillRobCard() {
+        return Math.floor(Math.random() * 10) > 4;
+    }
+
+    static aiSelectCardToDropForRob(player, trumpCard) {
+        var card = player.cards[0];
+        if (PlayerLogic.getGameLogicModule().isAceOfTrumps(card, trumpCard)) {
+            card = player.cards[1];
+        }
+
+        return card.cardName;
+    }
+}
+
+
 class Player {
     constructor(name, isSelfPlayer = false) {
         this.name = name;
@@ -28,32 +72,19 @@ class Player {
     }
 
     playCard(cardName) {
-        let cardIndex = this.cards.findIndex(card => card.cardName == cardName);
-        if (cardIndex > -1) {
-            let playedCard = this.cards[cardIndex];
-            this.cards.splice(cardIndex, 1);
-            return playedCard;
-        }
-        return this.cards[0];
+        return PlayerLogic.playCard(this, cardName);
     }
 
     aiPlayCard(playedCards, trumpCard) {
-        let cardToPlay = Player.getGameLogicModule().getBestCardFromOptions(this.cards, trumpCard, playedCards);
-        this.playCard(cardToPlay.cardName);
-        return cardToPlay;
+        return PlayerLogic.aiPlayCard(this, playedCards, trumpCard);
     }
 
     aiWillRobCard() {
-        return Math.floor(Math.random() * 10) > 4;
+        return PlayerLogic.aiWillRobCard();
     }
 
     aiSelectCardToDropForRob(trumpCard) {
-        var card = this.cards[0];
-        if (Player.getGameLogicModule().isAceOfTrumps(card, trumpCard)) {
-            card = this.cards[1];
-        }
-
-        return card.cardName;
+        return PlayerLogic.aiSelectCardToDropForRob(this, trumpCard);
     }
 }
 

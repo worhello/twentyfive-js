@@ -34,4 +34,30 @@ describe('Player Tests', function() {
             assert.strictEqual(playedCard.value, tf.CardValues.seven);
         });
     });
+
+    describe("assert that AI will not drop ace of trumps when robbing", function() {
+        var trumpCard = new tf.TrumpCard();
+        trumpCard.card = new tf.Card(tf.CardSuits.clubs, tf.CardValues.eight);
+
+        let expectedCardToDrop = new tf.Card(tf.CardSuits.clubs, tf.CardValues.eight);
+        it ("should drop the first card if first card is NOT ace of trumps", function() {
+            player.cards = [
+                expectedCardToDrop,
+                new tf.Card(tf.CardSuits.clubs, tf.CardValues.ace)
+            ];
+
+            let actualCard = player.aiSelectCardToDropForRob(trumpCard);
+            assert.strictEqual(actualCard, expectedCardToDrop.cardName);
+        });
+
+        it ("should drop the second card if first card IS ace of trumps", function() {
+            player.cards = [
+                new tf.Card(tf.CardSuits.clubs, tf.CardValues.ace),
+                expectedCardToDrop
+            ];
+
+            let actualCard = player.aiSelectCardToDropForRob(trumpCard);
+            assert.strictEqual(actualCard, expectedCardToDrop.cardName);
+        });
+    });
 });

@@ -1,5 +1,12 @@
 "use strict";
 
+class TrumpCardLogic {
+    static steal(trumpCard, player) {
+        trumpCard.hasBeenStolen = true;
+        trumpCard.stolenBy = player
+    }
+}
+
 class TrumpCard {
     constructor() {
         this.card = new (this.getCardModule()).Card();
@@ -18,8 +25,7 @@ class TrumpCard {
     }
 
     steal(player) {
-        this.hasBeenStolen = true;
-        this.stolenBy = player
+        TrumpCardLogic.steal(this, player);
     }
 }
 

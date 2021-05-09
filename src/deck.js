@@ -16,6 +16,16 @@ class Deck {
         }
     }
 
+    static getHelpersModule() {
+        if (typeof module !== 'undefined' && module.exports != null) {
+            let m = require("./helpers");
+            return m;
+        }
+        else {
+            return window.helpers;
+        }
+    }
+
     static buildDeck() {
         var cards = [];
         let cardModule = Deck.getCardModule();
@@ -28,9 +38,7 @@ class Deck {
     }
 
     static shuffleDeck(cards) {
-        cards.sort(function() {
-            return .5 - Math.random();
-        });
+        Deck.getHelpersModule().Helpers.shuffle(cards);
     }
 }
 
