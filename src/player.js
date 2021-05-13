@@ -43,48 +43,21 @@ class PlayerLogic
     }
 }
 
+function buildPlayerId(name) {
+    let strippedName = name.replace(/ /g,'');
+    return "playerId_" + strippedName;
+}
 
 class Player {
     constructor(name, isSelfPlayer = false) {
         this.name = name;
-        this.id = Player.getPlayerId(name);
+        this.id = buildPlayerId(name);
         this.cards = [];
         this.score = 0;
         this.isSelfPlayer = isSelfPlayer;
         this.isDealer = false;
         this.isAi = false;
         this.isReadyForNextRound = false;
-    }
-
-    static getPlayerId(name) {
-        let strippedName = name.replace(/ /g,'');
-        return "playerId_" + strippedName;
-    }
-
-    static getGameLogicModule() {
-        if (typeof module !== 'undefined' && module.exports != null) {
-            let gameLogic = require("./gameLogic");
-            return gameLogic;
-        }
-        else {
-            return window.gameLogic;
-        }
-    }
-
-    playCard(cardName) {
-        return PlayerLogic.playCard(this, cardName);
-    }
-
-    aiPlayCard(playedCards, trumpCard) {
-        return PlayerLogic.aiPlayCard(this, playedCards, trumpCard);
-    }
-
-    aiWillRobCard() {
-        return PlayerLogic.aiWillRobCard();
-    }
-
-    aiSelectCardToDropForRob(trumpCard) {
-        return PlayerLogic.aiSelectCardToDropForRob(this, trumpCard);
     }
 }
 
@@ -99,6 +72,7 @@ function buildAiPlayer() {
 (function () {
     let playerExports = {};
     playerExports.Player = Player;
+    playerExports.PlayerLogic = PlayerLogic;
     playerExports.buildAiPlayer = buildAiPlayer;
     
     if (typeof module !== 'undefined' && module.exports != null) {

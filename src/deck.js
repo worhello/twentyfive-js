@@ -1,11 +1,6 @@
 "use strict";
 
-class Deck {
-    constructor() {
-        this.cards = Deck.buildDeck();
-        Deck.shuffleDeck(this.cards);
-    }
-
+class DeckHelper {
     static getCardModule() {
         if (typeof module !== 'undefined' && module.exports != null) {
             let card = require("./card");
@@ -28,7 +23,7 @@ class Deck {
 
     static buildDeck() {
         var cards = [];
-        let cardModule = Deck.getCardModule();
+        let cardModule = DeckHelper.getCardModule();
         for (let [_, s] of Object.entries(cardModule.CardSuits)) {
             for (let [_1, v] of Object.entries(cardModule.CardValues)) {
                 cards.push(new cardModule.Card(s, v));
@@ -38,7 +33,15 @@ class Deck {
     }
 
     static shuffleDeck(cards) {
-        Deck.getHelpersModule().Helpers.shuffle(cards);
+        DeckHelper.getHelpersModule().Helpers.shuffle(cards);
+    }
+}
+
+class Deck {
+    constructor() {
+        this.cards = DeckHelper.buildDeck();
+
+        DeckHelper.shuffleDeck(this.cards);
     }
 }
 

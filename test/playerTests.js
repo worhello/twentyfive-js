@@ -29,7 +29,7 @@ describe('Player Tests', function() {
         });
 
         it("card the player does have", function() {
-            let playedCard = player.playCard("7_of_hearts");
+            let playedCard = tf.PlayerLogic.playCard(player, "7_of_hearts");
             assert.strictEqual(playedCard.suit, tf.CardSuits.hearts);
             assert.strictEqual(playedCard.value, tf.CardValues.seven);
         });
@@ -46,7 +46,7 @@ describe('Player Tests', function() {
                 new tf.Card(tf.CardSuits.clubs, tf.CardValues.ace)
             ];
 
-            let actualCard = player.aiSelectCardToDropForRob(trumpCard);
+            let actualCard = tf.PlayerLogic.aiSelectCardToDropForRob(player, trumpCard);
             assert.strictEqual(actualCard, expectedCardToDrop.cardName);
         });
 
@@ -56,7 +56,7 @@ describe('Player Tests', function() {
                 expectedCardToDrop
             ];
 
-            let actualCard = player.aiSelectCardToDropForRob(trumpCard);
+            let actualCard = tf.PlayerLogic.aiSelectCardToDropForRob(player, trumpCard);
             assert.strictEqual(actualCard, expectedCardToDrop.cardName);
         });
     });

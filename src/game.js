@@ -10,22 +10,8 @@ const GameState = Object.freeze({
     gameFinished: 6
 });
 
-class Game {
-    constructor(id, numberOfPlayers, disableReneging) {
-        this.id = id;
-        this.numberOfPlayers = numberOfPlayers;
-        this.renegingDisabled = disableReneging;
-        this.players = [];
-        this.deck = new (this.getDeckModule()).Deck();
-        this.trumpCard = new (this.getTrumpCardModule()).TrumpCard();
-        this.roundPlayerAndCards = [];
-        this.currentPlayerIndex = 0;
-        this.currentWinningPlayerAndCard = {};
-        this.currentState = GameState.notStarted;
-        this.nextRoundFirstPlayerId = "";
-    }
-
-    getDeckModule() {
+class GameHelper {
+    static getDeckModule() {
         if (typeof module !== 'undefined' && module.exports != null) {
             let m = require("./deck");
             return m;
@@ -34,8 +20,8 @@ class Game {
             return window.deck;
         }
     }
-    
-    getTrumpCardModule() {
+
+    static getTrumpCardModule() {
         if (typeof module !== 'undefined' && module.exports != null) {
             let m = require("./trumpCard");
             return m;
@@ -43,6 +29,22 @@ class Game {
         else {
             return window.trumpCard;
         }
+    }
+}
+
+class Game {
+    constructor(id, numberOfPlayers, disableReneging) {
+        this.id = id;
+        this.numberOfPlayers = numberOfPlayers;
+        this.renegingDisabled = disableReneging;
+        this.players = [];
+        this.deck = new (GameHelper.getDeckModule()).Deck();
+        this.trumpCard = new (GameHelper.getTrumpCardModule()).TrumpCard();
+        this.roundPlayerAndCards = [];
+        this.currentPlayerIndex = 0;
+        this.currentWinningPlayerAndCard = {};
+        this.currentState = GameState.notStarted;
+        this.nextRoundFirstPlayerId = "";
     }
 }
 

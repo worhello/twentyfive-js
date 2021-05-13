@@ -14,6 +14,7 @@ module.exports.Helpers = helpers.Helpers;
 module.exports.gameLogic = gameLogic;
 
 module.exports.Player = playerModule.Player;
+module.exports.PlayerLogic = playerModule.PlayerLogic;
 
 module.exports.Card = card.Card;
 module.exports.CardSuits = card.CardSuits;

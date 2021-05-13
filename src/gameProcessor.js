@@ -162,9 +162,9 @@ class GameProcessor {
     }
 
     async robCard(player, droppedCardName) {
-        player.playCard(droppedCardName);
+        this.getPlayerModule().PlayerLogic.playCard(player, droppedCardName);
         player.cards.push(this.game.trumpCard.card);
-        this.game.trumpCard.steal(player);
+        this.getTrumpCardModule().TrumpCardLogic.steal(this.game.trumpCard, player);
 
         await this.startRound();
     }
@@ -179,12 +179,14 @@ class GameProcessor {
             return;
         }
 
-        let willRob = player.aiWillRobCard();
+        let playerLogic = getPlayerModule().PlayerLogic;
+
+        let willRob = playerLogic.aiWillRobCard();
         if (willRob == false) {
             return;
         }
 
-        await this.robCard(player, player.aiSelectCardToDropForRob(this.game.trumpCard));
+        await this.robCard(player, playerLogic.aiSelectCardToDropForRob(player, this.game.trumpCard));
     }
 
     async shouldNotifyPlayerForRobbing(player) {
@@ -338,7 +340,7 @@ class GameProcessor {
 
     playerBestCardAi(player) {
         let playedCards = this.getPlayedCards();
-        return player.aiPlayCard(playedCards, this.game.trumpCard);
+        return this.getPlayerModule().PlayerLogic.aiPlayCard(player, playedCards, this.game.trumpCard);
     }
 
     async requestNextPlayerMove() {
@@ -448,7 +450,7 @@ class GameProcessor {
         if (!player) {
             return;
         }
-        let playedCard = player.playCard(cardDetails.cardName);
+        let playedCard = this.getPlayerModule().PlayerLogic.playCard(player, cardDetails.cardName);
         if (playedCard) {
             await this.playCard(player, playedCard);
         }
