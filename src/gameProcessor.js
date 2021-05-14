@@ -29,7 +29,7 @@ class GameProcessor {
         this.notifyOnePlayerFunc = notifyOnePlayerFunc;
         this.notifyStateChangeFunc = notifyStateChangeFunc;
         this.notifyGameChangedFunc = notifyGameChangedFunc;
-        this.aiPlayerDelay = 0;
+        this.nextActionDelayTime = 0;
     }
 
     getPlayerModule() {
@@ -349,10 +349,14 @@ class GameProcessor {
         return this.getPlayerModule().PlayerLogic.aiPlayCard(player, playedCards, this.game.trumpCard);
     }
 
-    async playAiCardWithDelay(player) {
-        if (this.aiPlayerDelay > 0) {
-            await new Promise(resolve => setTimeout(resolve, this.aiPlayerDelay));
+    async delayNextAction() {
+        if (this.nextActionDelayTime > 0) {
+            await new Promise(resolve => setTimeout(resolve, this.nextActionDelayTime));
         }
+    }
+
+    async playAiCardWithDelay(player) {
+        await this.delayNextAction();
         this.playCard(player, this.playerBestCardAi(player));
     }
 
@@ -511,6 +515,9 @@ class GameProcessor {
     }
 
     async evaluateRoundEnd() {
+        await this.delayNextAction();
+        await this.delayNextAction();
+
         let playedCards = this.getPlayedCards();
         let winningCard = this.getGameLogicModule().getWinningCard(this.game.trumpCard, playedCards);
         let winningPlayer = this.game.roundPlayerAndCards.find(pAC => pAC.card == winningCard).player;
