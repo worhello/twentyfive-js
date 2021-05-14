@@ -1,10 +1,11 @@
 {
   "name": "twentyfive",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "license": "MIT",
   "dependencies": {
     "assert": "latest",
-    "mocha": "^8.3.2"
+    "mocha": "^8.4.0",
+    "sinon": "latest"
   },
   "scripts": {
     "test": "mocha test/*.js"
