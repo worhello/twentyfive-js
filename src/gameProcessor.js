@@ -29,6 +29,7 @@ class GameProcessor {
         this.notifyOnePlayerFunc = notifyOnePlayerFunc;
         this.notifyStateChangeFunc = notifyStateChangeFunc;
         this.notifyGameChangedFunc = notifyGameChangedFunc;
+        this.nextActionDelayTime = 0;
     }
 
     getPlayerModule() {
@@ -124,8 +125,13 @@ class GameProcessor {
 
     async fillWithAis() {
         let numAiPlayersNeeded = this.game.numberOfPlayers - this.game.players.length;
+        var promises = [];
         for (var i = 0; i < numAiPlayersNeeded; i++) {
-            await this.addPlayer((this.getPlayerModule()).buildAiPlayer(), i == (numAiPlayersNeeded - 1)); // only notify once
+            promises.push(this.addPlayer((this.getPlayerModule()).buildAiPlayer(), i == (numAiPlayersNeeded - 1))); // only notify once
+        }
+
+        for (let p of promises) {
+            await p;
         }
     }
 
@@ -343,20 +349,31 @@ class GameProcessor {
         return this.getPlayerModule().PlayerLogic.aiPlayCard(player, playedCards, this.game.trumpCard);
     }
 
+    async delayNextAction() {
+        if (this.nextActionDelayTime > 0) {
+            await new Promise(resolve => setTimeout(resolve, this.nextActionDelayTime));
+        }
+    }
+
+    async playAiCardWithDelay(player) {
+        await this.delayNextAction();
+        this.playCard(player, this.playerBestCardAi(player));
+    }
+
     async requestNextPlayerMove() {
         let player = this.game.players[this.game.currentPlayerIndex];
-        let p1 = this.notifyAllCurrentPlayerMovePending(player);
-        var p2 = null;
+        var promises = [];
+        promises.push(this.notifyAllCurrentPlayerMovePending(player));
         if (player.isAi == true) {
-            this.playCard(player, this.playerBestCardAi(player));
+            promises.push(this.playAiCardWithDelay(player));
         }
         else {
             this.updatePlayerCardsEnabled(player);
-            p2 = this.notifyOnePlayerMoveRequested(player);
+            promises.push(this.notifyOnePlayerMoveRequested(player));
         }
-        await p1;
-        if (p2) {
-            await p2;
+
+        for (let p of promises) {
+            await p;
         }
     }
 
@@ -498,6 +515,9 @@ class GameProcessor {
     }
 
     async evaluateRoundEnd() {
+        await this.delayNextAction();
+        await this.delayNextAction();
+
         let playedCards = this.getPlayedCards();
         let winningCard = this.getGameLogicModule().getWinningCard(this.game.trumpCard, playedCards);
         let winningPlayer = this.game.roundPlayerAndCards.find(pAC => pAC.card == winningCard).player;
