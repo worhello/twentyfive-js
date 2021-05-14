@@ -274,6 +274,27 @@ class GameProcessor {
         }
     }
 
+    async robOrStartPlaying(canRobThisRound) {
+        var promises = [];
+        var requestNextMove = true;
+        if (canRobThisRound == true) {
+            let trumpCardCanBeRobbed = await this.checkIfAnyPlayerCanRobAndNotify();
+            if (trumpCardCanBeRobbed) {
+                // waiting for the player who can rob to do something
+                // the resulting player actions will handle starting the round
+                promises.push(this.moveToState(GameState.waitingForPlayerToRobTrumpCard));
+                requestNextMove = false;
+            }
+        }
+        if (requestNextMove == true) {
+            promises.push(this.requestNextPlayerMove());
+        }
+
+        for (let p of promises) {
+            await p;
+        }
+    }
+
     async startRound() {
         await this.moveToState(GameState.inProgress);
         this.resetDeckIfNeeded();
@@ -289,20 +310,7 @@ class GameProcessor {
 
         var promises = [];
         promises.push(this.notifyAllGameInitialState());
-
-        var requestNextMove = true;
-        if (canRobThisRound == true) {
-            let trumpCardCanBeRobbed = await this.checkIfAnyPlayerCanRobAndNotify();
-            if (trumpCardCanBeRobbed) {
-                // waiting for the player who can rob to do something
-                // the resulting player actions will handle starting the round
-                promises.push(this.moveToState(GameState.waitingForPlayerToRobTrumpCard));
-                requestNextMove = false;
-            }
-        }
-        if (requestNextMove == true) {
-            promises.push(this.requestNextPlayerMove());
-        }
+        promises.push(this.robOrStartPlaying(canRobThisRound));
 
         for (let p of promises) {
             await p;
