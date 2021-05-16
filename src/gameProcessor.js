@@ -181,7 +181,7 @@ class GameProcessor {
 
     aiWillRob(player) {
         // TODO - seed player will chance for specific player
-        return getPlayerModule().PlayerLogic.aiWillRobCard();
+        return this.getPlayerModule().PlayerLogic.aiWillRobCard();
     }
 
     async aiAttemptRob(player) {
@@ -203,7 +203,7 @@ class GameProcessor {
         // sequence is explained in the rules
 
         // first check dealer
-        let dealerIndex = this.game.players.findIndex(p => p.isDealer === true);
+        let dealerIndex = this.game.players.findIndex(p => p.isDealer == true);
         let dealer = this.game.players[dealerIndex];
         let dealerNeedsNotification = this.playerCanRobTrumpCard(dealer);
         if (dealerNeedsNotification) {
