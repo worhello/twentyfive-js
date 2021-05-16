@@ -1,15 +1,5 @@
 "use strict";
 
-const GameState = Object.freeze({
-    notStarted: 0,
-    waitingForPlayers: 1,
-    readyToPlay: 2,
-    inProgress: 3,
-    waitingToDealNewCards: 4,
-    waitingForPlayerToRobTrumpCard: 5,
-    gameFinished: 6
-});
-
 function buildPlayerDetailsJson(players) {
     var out = [];
     for (var i = 0; i < players.length; i++) {
@@ -72,6 +62,16 @@ class GameProcessor {
         }
     }
 
+    getGameModule() {
+        if (typeof module !== 'undefined' && module.exports != null) {
+            let m = require("./game");
+            return m;
+        }
+        else {
+            return window.game;
+        }
+    }
+
     getHelpersModule() {
         if (typeof module !== 'undefined' && module.exports != null) {
             let m = require("./helpers");
@@ -83,7 +83,7 @@ class GameProcessor {
     }
 
     async init() {
-        await this.moveToState(GameState.waitingForPlayers);
+        await this.moveToState(this.getGameModule().GameState.waitingForPlayers);
     }
 
     async moveToState(newState) {
@@ -97,7 +97,7 @@ class GameProcessor {
 
     async notifyIfReadyToPlay() {
         if (this.game.players.length == this.game.numberOfPlayers) {
-            await this.moveToState(GameState.readyToPlay);
+            await this.moveToState(this.getGameModule().GameState.readyToPlay);
         }
     }
 
@@ -179,30 +179,15 @@ class GameProcessor {
         return this.getGameLogicModule().canTrumpCardBeRobbed(player.cards, player.isDealer, this.game.trumpCard);
     }
 
-    async aiAttemptRob(player) {
-        let canRob = this.playerCanRobTrumpCard(player);
-        if (canRob == false) {
-            return;
-        }
-
-        let playerLogic = getPlayerModule().PlayerLogic;
-
-        let willRob = playerLogic.aiWillRobCard();
-        if (willRob == false) {
-            return;
-        }
-
-        await this.robCard(player, playerLogic.aiSelectCardToDropForRob(player, this.game.trumpCard));
+    aiWillRob(player) {
+        // TODO - seed player will chance for specific player
+        return getPlayerModule().PlayerLogic.aiWillRobCard();
     }
 
-    async shouldNotifyPlayerForRobbing(player) {
-        if (player.isAi) {
-            await this.aiAttemptRob(player);
+    async aiAttemptRob(player) {
+        if (this.playerCanRobTrumpCard(player)) {
+            await this.robCard(player, this.getPlayerModule().PlayerLogic.aiSelectCardToDropForRob(player, this.game.trumpCard));
         }
-        else if (this.playerCanRobTrumpCard(player)) {
-            return true;
-        }
-        return false;
     }
 
     async notifyOnePlayerRobTrumpCardAvailable(p) {
@@ -214,16 +199,15 @@ class GameProcessor {
         await this.notifyOnePlayer(p.id, data);
     }
 
-    async checkIfAnyPlayerCanRobAndNotify() {
+    checkIfAnyPlayerCanRobAndNotify() {
         // sequence is explained in the rules
 
         // first check dealer
         let dealerIndex = this.game.players.findIndex(p => p.isDealer === true);
         let dealer = this.game.players[dealerIndex];
-        let dealerNeedsNotification = await this.shouldNotifyPlayerForRobbing(dealer);
+        let dealerNeedsNotification = this.playerCanRobTrumpCard(dealer);
         if (dealerNeedsNotification) {
-            await this.notifyOnePlayerRobTrumpCardAvailable(dealer);
-            return true;
+            return dealer;
         }
 
         // then cycle through other players
@@ -232,14 +216,13 @@ class GameProcessor {
                 continue; // already handled above
             }
 
-            let playerNeedsNotification = await this.shouldNotifyPlayerForRobbing(player);
+            let playerNeedsNotification = this.playerCanRobTrumpCard(player);
             if (playerNeedsNotification) {
-                await this.notifyOnePlayerRobTrumpCardAvailable(player);
-                return true;
+                return player;
             }
         }
 
-        return false;
+        return null;
     }
 
     async notifyAllGameError(errorMessage) {
@@ -251,7 +234,7 @@ class GameProcessor {
     }
 
     async start() {
-        if (this.game.currentState == GameState.readyToPlay) {
+        if (this.game.currentState == this.getGameModule().GameState.readyToPlay) {
             this.getHelpersModule().Helpers.shuffle(this.game.players);
             await this.startRound();
         }
@@ -274,18 +257,35 @@ class GameProcessor {
         }
     }
 
+    async handlePlayerRobbing(player) {
+        if (player.isAi) {
+            await this.aiAttemptRob(player);
+        }
+        else {
+            await this.notifyOnePlayerRobTrumpCardAvailable(player);
+        }
+    }
+
     async robOrStartPlaying(canRobThisRound) {
         var promises = [];
         var requestNextMove = true;
         if (canRobThisRound == true) {
-            let trumpCardCanBeRobbed = await this.checkIfAnyPlayerCanRobAndNotify();
-            if (trumpCardCanBeRobbed) {
-                // waiting for the player who can rob to do something
-                // the resulting player actions will handle starting the round
-                promises.push(this.moveToState(GameState.waitingForPlayerToRobTrumpCard));
-                requestNextMove = false;
+            let playerCanRob = this.checkIfAnyPlayerCanRobAndNotify();
+            if (playerCanRob) {
+                var playerWillRob = playerCanRob.isAi ? this.aiWillRob(playerCanRob) : true;
+                if (playerWillRob) {
+                    // waiting for the player who can rob to do something
+                    // the resulting player actions will handle starting the round
+                    promises.push(this.handlePlayerRobbing(playerCanRob));
+                    promises.push(this.moveToState(this.getGameModule().GameState.waitingForPlayerToRobTrumpCard));
+                    requestNextMove = false;
+                }
+                else {
+                    console.log("player " + playerCanRob.id + " chose not to rob");
+                }
             }
         }
+
         if (requestNextMove == true) {
             promises.push(this.requestNextPlayerMove());
         }
@@ -296,7 +296,7 @@ class GameProcessor {
     }
 
     async startRound() {
-        await this.moveToState(GameState.inProgress);
+        await this.moveToState(this.getGameModule().GameState.inProgress);
         this.resetDeckIfNeeded();
         this.game.roundPlayerAndCards = [];
         var canRobThisRound = false;
@@ -308,10 +308,10 @@ class GameProcessor {
             canRobThisRound = true;
         }
 
-        var promises = [];
-        promises.push(this.notifyAllGameInitialState());
-        promises.push(this.robOrStartPlaying(canRobThisRound));
-
+        var promises = [
+            this.notifyAllGameInitialState(),
+            this.robOrStartPlaying(canRobThisRound)
+        ];
         for (let p of promises) {
             await p;
         }
@@ -346,7 +346,7 @@ class GameProcessor {
     }
 
     updatePlayerCardsEnabled(player) {
-        if (this.game.disableReneging) {
+        if (this.game.disableReneging == true) {
             let playedCards = this.getPlayedCards();
             this.getGameLogicModule().updatePlayerCardsEnabledState(playedCards, player.cards, this.game.trumpCard);
         }
@@ -365,7 +365,7 @@ class GameProcessor {
 
     async playAiCardWithDelay(player) {
         await this.delayNextAction();
-        this.playCard(player, this.playerBestCardAi(player));
+        await this.playCard(player, this.playerBestCardAi(player));
     }
 
     async requestNextPlayerMove() {
@@ -546,13 +546,13 @@ class GameProcessor {
             var promises = [];
             if (winnerWithHighestScore.score >= 25) {
                 promises.push(game.notifyAllRoundFinished(orderedPlayers, "gameFinished"));
-                promises.push(game.moveToState(GameState.gameFinished));
+                promises.push(game.moveToState(game.getGameModule().GameState.gameFinished));
             }
             else if (game.mustDealNewCards()) {
                 game.markAllPlayersWaitingForNextRound();
                 game.game.nextRoundFirstPlayerId = orderedPlayers[0].id;
                 promises.push(game.notifyAllRoundFinished(orderedPlayers, "roundFinished"));
-                promises.push(game.moveToState(GameState.waitingToDealNewCards));
+                promises.push(game.moveToState(game.getGameModule().GameState.waitingToDealNewCards));
             }
             else {
                 promises.push(game.notifyAllRoundFinished(orderedPlayers, "scoresUpdated"));
