@@ -21,11 +21,15 @@ describe('Player Tests', function() {
 
     describe("check that playing a card removes it from the player", function() {
         it("invalid input", function() {
-            // TODO
+            let playedCard = tf.PlayerLogic.playCard(player, "");
+            assert.strictEqual(playedCard.suit, tf.CardSuits.clubs);
+            assert.strictEqual(playedCard.value, tf.CardValues.eight);
         });
 
         it("card the player does not have", function() {
-            // TODO
+            let playedCard = tf.PlayerLogic.playCard(player, "game_of_thrones");
+            assert.strictEqual(playedCard.suit, tf.CardSuits.clubs);
+            assert.strictEqual(playedCard.value, tf.CardValues.eight);
         });
 
         it("card the player does have", function() {

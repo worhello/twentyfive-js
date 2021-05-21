@@ -2,8 +2,7 @@
 
 function getCardModule() {
     if (typeof module !== 'undefined' && module.exports != null) {
-        let card = require("./card");
-        return card;
+        return require("./card");
     }
     else {
         return window.card;
