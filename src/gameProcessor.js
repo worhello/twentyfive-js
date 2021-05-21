@@ -134,6 +134,7 @@ class GameProcessor {
         let playersDetails = buildPlayerDetailsJson(this.game.players);
         let data = {
             type: "playerListChanged",
+            gameId: this.game.id,
             playersDetails: playersDetails,
             needMorePlayers: this.needsMorePlayers()
         }
@@ -387,6 +388,7 @@ class GameProcessor {
     async notifyAllCurrentPlayerMovePending(player) {
         let data = {
             type: "currentPlayerMovePending",
+            gameId: this.game.id,
             userId: player.id
         }
         await this.notifyAllPlayers(data);
@@ -395,6 +397,7 @@ class GameProcessor {
     async notifyOnePlayerMoveRequested(p) {
         let data = {
             type: "playerMoveRequested",
+            gameId: this.game.id,
             userId: p.id
         }
         await this.notifyOnePlayer(p.id, data);
@@ -612,6 +615,7 @@ class GameProcessor {
     async notifyAllCardPlayed(player, playedCard, isNewWinningCard) {
         let data = {
             type: "cardPlayed",
+            gameId: this.game.id,
             userId: player.id,
             playedCard: playedCard,
             isNewWinningCard: isNewWinningCard
@@ -622,6 +626,7 @@ class GameProcessor {
     async notifyOneCardsUpdated(player) {
         let data = {
             type: "cardsUpdated",
+            gameId: this.game.id,
             userId: player.id,
             cards: player.cards
         }
