@@ -6,7 +6,8 @@ function buildPlayerDetailsJson(players) {
         let p = players[i];
         out.push({
             name: p.name,
-            userId: p.id
+            userId: p.id,
+            isAi: p.isAi
         });
     }
 
