@@ -24,8 +24,7 @@ class GameProcessor {
 
     getPlayerModule() {
         if (typeof module !== 'undefined' && module.exports != null) {
-            let m = require("./player");
-            return m;
+            return require("./player");
         }
         else {
             return window.playerModule;
@@ -34,8 +33,7 @@ class GameProcessor {
     
     getDeckModule() {
         if (typeof module !== 'undefined' && module.exports != null) {
-            let m = require("./deck");
-            return m;
+            return require("./deck");
         }
         else {
             return window.deck;
@@ -44,8 +42,7 @@ class GameProcessor {
     
     getTrumpCardModule() {
         if (typeof module !== 'undefined' && module.exports != null) {
-            let m = require("./trumpCard");
-            return m;
+            return require("./trumpCard");
         }
         else {
             return window.trumpCard;
@@ -54,8 +51,7 @@ class GameProcessor {
     
     getGameLogicModule() {
         if (typeof module !== 'undefined' && module.exports != null) {
-            let m = require("./gameLogic");
-            return m;
+            return require("./gameLogic");
         }
         else {
             return window.gameLogic;
@@ -64,8 +60,7 @@ class GameProcessor {
 
     getGameModule() {
         if (typeof module !== 'undefined' && module.exports != null) {
-            let m = require("./game");
-            return m;
+            return require("./game");
         }
         else {
             return window.game;
@@ -74,8 +69,7 @@ class GameProcessor {
 
     getHelpersModule() {
         if (typeof module !== 'undefined' && module.exports != null) {
-            let m = require("./helpers");
-            return m;
+            return require("./helpers");
         }
         else {
             return window.helpers;

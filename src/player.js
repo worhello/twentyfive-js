@@ -5,8 +5,7 @@ class PlayerLogic
 {
     static getGameLogicModule() {
         if (typeof module !== 'undefined' && module.exports != null) {
-            let gameLogic = require("./gameLogic");
-            return gameLogic;
+            return require("./gameLogic");
         }
         else {
             return window.gameLogic;
@@ -20,7 +19,7 @@ class PlayerLogic
             player.cards.splice(cardIndex, 1);
             return playedCard;
         }
-        return this.cards[0];
+        return player.cards[0];
     }
 
     static aiPlayCard(player, playedCards, trumpCard) {

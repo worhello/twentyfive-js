@@ -13,8 +13,7 @@ const GameState = Object.freeze({
 class GameHelper {
     static getDeckModule() {
         if (typeof module !== 'undefined' && module.exports != null) {
-            let m = require("./deck");
-            return m;
+            return require("./deck");
         }
         else {
             return window.deck;
@@ -23,8 +22,7 @@ class GameHelper {
 
     static getTrumpCardModule() {
         if (typeof module !== 'undefined' && module.exports != null) {
-            let m = require("./trumpCard");
-            return m;
+            return require("./trumpCard");
         }
         else {
             return window.trumpCard;

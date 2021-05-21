@@ -3,8 +3,7 @@
 class DeckHelper {
     static getCardModule() {
         if (typeof module !== 'undefined' && module.exports != null) {
-            let card = require("./card");
-            return card;
+            return require("./card");
         }
         else {
             return window.card;
@@ -13,8 +12,7 @@ class DeckHelper {
 
     static getHelpersModule() {
         if (typeof module !== 'undefined' && module.exports != null) {
-            let m = require("./helpers");
-            return m;
+            return require("./helpers");
         }
         else {
             return window.helpers;
