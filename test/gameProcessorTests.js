@@ -14,6 +14,7 @@ function checkPlayerListChangedEvent(data, expectedNeedsMorePlayers, expectedNum
     assert.strictEqual(data.playerId, gameProcessorTests_selfPlayerId);
     let eventData = data.data;
     assert.strictEqual(eventData.type, "playerListChanged");
+    assert.strictEqual(eventData.gameId, gameProcessorTests_gameId);
     assert.strictEqual(eventData.needMorePlayers, expectedNeedsMorePlayers);
     assert.strictEqual(eventData.playersDetails.length, expectedNumberOfPlayers);
 }
@@ -28,60 +29,122 @@ function checkInitialStateEvent(data, trumpCardData) {
 }
 
 function checkCurrentPlayerMovePendingEvent(data, isSelfPlayer) {
-    // TODO expand checks
     assert.strictEqual(data.playerId, gameProcessorTests_selfPlayerId);
     let eventData = data.data;
     assert.strictEqual(eventData.type, "currentPlayerMovePending");
+    assert.strictEqual(eventData.gameId, gameProcessorTests_gameId);
     assert.strictEqual(eventData.userId == gameProcessorTests_selfPlayerId, isSelfPlayer);
 }
 
-function checkCardPlayedEvent(data) {
-    // TODO expand checks
+function checkCardPlayedEvent(data, expectedIsNewWinningCard) {
     assert.strictEqual(data.playerId, gameProcessorTests_selfPlayerId);
     let eventData = data.data;
     assert.strictEqual(eventData.type, "cardPlayed");
-    //console.log(data);
+    assert.strictEqual(eventData.gameId, gameProcessorTests_gameId);
+    assert.strictEqual(eventData.isNewWinningCard, expectedIsNewWinningCard);
 }
 
 function checkPlayerMoveRequestedEvent(data) {
-    // TODO expand checks
     assert.strictEqual(data.playerId, gameProcessorTests_selfPlayerId);
     let eventData = data.data;
     assert.strictEqual(eventData.type, "playerMoveRequested");
-    //console.log(data);
+    assert.strictEqual(eventData.gameId, gameProcessorTests_gameId);
+    assert.strictEqual(eventData.userId, gameProcessorTests_selfPlayerId);
 }
 
-function checkCardsUpdatedEvent(data) {
-    // TODO expand checks
+function checkCardsUpdatedEvent(data, numCardsAfterUpdate) {
     assert.strictEqual(data.playerId, gameProcessorTests_selfPlayerId);
     let eventData = data.data;
     assert.strictEqual(eventData.type, "cardsUpdated");
-    //console.log(data);
+    assert.strictEqual(eventData.gameId, gameProcessorTests_gameId);
+    assert.strictEqual(eventData.cards.length, numCardsAfterUpdate);
+    assert.strictEqual(eventData.cards.every((card) => card.canPlay), true);
 }
 
 function checkScoresUpdatedEvent(data) {
-    // TODO expand checks
     assert.strictEqual(data.playerId, gameProcessorTests_selfPlayerId);
     let eventData = data.data;
     assert.strictEqual(eventData.type, "scoresUpdated");
-    //console.log(data);
+    assert.strictEqual(eventData.gameId, gameProcessorTests_gameId);
+    assert.strictEqual(eventData.orderedPlayers.length, 2);
+    assert.strictEqual(eventData.orderedPlayers[0].score < 25, true);
+    assert.strictEqual(eventData.orderedPlayers[1].score < 25, true);
 }
 
 function checkRoundFinishedEvent(data) {
-    // TODO expand checks
     assert.strictEqual(data.playerId, gameProcessorTests_selfPlayerId);
     let eventData = data.data;
     assert.strictEqual(eventData.type, "roundFinished");
-    //console.log(data);
+    assert.strictEqual(eventData.gameId, gameProcessorTests_gameId);
+    assert.strictEqual(eventData.orderedPlayers.length, 2);
+    assert.strictEqual(eventData.orderedPlayers[0].id, gameProcessorTests_selfPlayerId);
+    assert.strictEqual(eventData.orderedPlayers[0].score < 25, true);
+    assert.notStrictEqual(eventData.orderedPlayers[1].id, gameProcessorTests_selfPlayerId);
+    assert.strictEqual(eventData.orderedPlayers[1].score < 25, true);
 }
 
 function checkGameFinishedEvent(data) {
-    // TODO expand checks
     assert.strictEqual(data.playerId, gameProcessorTests_selfPlayerId);
     let eventData = data.data;
     assert.strictEqual(eventData.type, "gameFinished");
-    //console.log(data);
+    assert.strictEqual(eventData.gameId, gameProcessorTests_gameId);
+    assert.strictEqual(eventData.orderedPlayers.length, 2);
+    assert.strictEqual(eventData.orderedPlayers[0].id, gameProcessorTests_selfPlayerId);
+    assert.strictEqual(eventData.orderedPlayers[0].score, 25);
+    assert.notStrictEqual(eventData.orderedPlayers[1].id, gameProcessorTests_selfPlayerId);
+    assert.strictEqual(eventData.orderedPlayers[1].score < 25, true);
 }
+
+function checkIsValidDataOnlyRecursive(obj) {
+    var isValid = true;
+    for (let k of Object.keys(obj)) {
+        if (Array.isArray(obj[k])) {
+            for (let x of obj[k]) {
+                isValid = isValid && checkIsValidDataOnlyRecursive(x);
+            }
+        }
+        else if (typeof obj[k] === 'object' && obj[k] !== null) {
+            isValid = isValid && checkIsValidDataOnlyRecursive(obj[k]);
+        }
+        else {
+            isValid = isValid && (typeof obj[k] !== 'function' && obj[k] !== null);
+        }
+    }
+
+    return isValid;
+}
+
+describe("checkIsValidDataOnlyRecursive tests", function() {
+    it("empty object", function() {
+        var data = {};
+        assert.strictEqual(checkIsValidDataOnlyRecursive(data), true);
+    });
+
+    it("has null object", function() {
+        var data = { foo: null };
+        assert.strictEqual(checkIsValidDataOnlyRecursive(data), false);
+    });
+
+    it("has primitive member", function() {
+        var data = { foo: 1 };
+        assert.strictEqual(checkIsValidDataOnlyRecursive(data), true);
+    });
+
+    it("has object member", function() {
+        var data = { foo: { i: 1 } };
+        assert.strictEqual(checkIsValidDataOnlyRecursive(data), true);
+    });
+
+    it("has function member", function() {
+        var data = { foo: function() {} };
+        assert.strictEqual(checkIsValidDataOnlyRecursive(data), false);
+    });
+
+    it("has function submember", function() {
+        var data = { foo: { i: function() {} } };
+        assert.strictEqual(checkIsValidDataOnlyRecursive(data), false);
+    });
+});
 
 describe('GameProcessor Tests', function() {
     var shuffleStub = sinon.stub(tf.Helpers, 'shuffle');
@@ -109,6 +172,7 @@ describe('GameProcessor Tests', function() {
 
     var notifyPlayerCallbacks = [];
     let notifyPlayerFunc = async function(playerId, data) {
+        assert.strictEqual(checkIsValidDataOnlyRecursive(data), true);
         notifyPlayerCallbacks.push({ playerId: playerId, data: data }); 
     };
     var notifyStateChangedCallbacks = [];
@@ -129,10 +193,10 @@ describe('GameProcessor Tests', function() {
         await gameProcessor.playCardWithId(gameProcessorTests_selfPlayerId, { cardName: selfPlayer.cards[0].cardName });
         checkNumCallbacks(8, 0, 0);
 
-        checkCardPlayedEvent(notifyPlayerCallbacks[0]);
-        checkCardsUpdatedEvent(notifyPlayerCallbacks[1]);
+        checkCardPlayedEvent(notifyPlayerCallbacks[0], true);
+        checkCardsUpdatedEvent(notifyPlayerCallbacks[1], expectedNumCards - 1);
         checkCurrentPlayerMovePendingEvent(notifyPlayerCallbacks[2], false);
-        checkCardPlayedEvent(notifyPlayerCallbacks[3]);
+        checkCardPlayedEvent(notifyPlayerCallbacks[3], false);
         checkScoresUpdatedEvent(notifyPlayerCallbacks[4]);
 
         checkInitialStateEvent(notifyPlayerCallbacks[5], trumpCard);
@@ -147,8 +211,8 @@ describe('GameProcessor Tests', function() {
         await gameProcessor.playCardWithId(gameProcessorTests_selfPlayerId, { cardName: selfPlayer.cards[0].cardName });
         checkNumCallbacks(6, 0, 0);
 
-        checkCardPlayedEvent(notifyPlayerCallbacks[0]);
-        checkCardsUpdatedEvent(notifyPlayerCallbacks[1]);
+        checkCardPlayedEvent(notifyPlayerCallbacks[0], true);
+        checkCardsUpdatedEvent(notifyPlayerCallbacks[1], expectedNumCards - 1);
         checkScoresUpdatedEvent(notifyPlayerCallbacks[2]);
 
         checkInitialStateEvent(notifyPlayerCallbacks[3], trumpCard);
@@ -163,13 +227,13 @@ describe('GameProcessor Tests', function() {
         await gameProcessor.playCardWithId(gameProcessorTests_selfPlayerId, { cardName: selfPlayer.cards[0].cardName });
         checkNumCallbacks(8, 0, 0);
 
-        checkCardPlayedEvent(notifyPlayerCallbacks[0]);
-        checkCardsUpdatedEvent(notifyPlayerCallbacks[1]);
+        checkCardPlayedEvent(notifyPlayerCallbacks[0], false);
+        checkCardsUpdatedEvent(notifyPlayerCallbacks[1], expectedNumCards - 1);
         checkScoresUpdatedEvent(notifyPlayerCallbacks[2]);
 
         checkInitialStateEvent(notifyPlayerCallbacks[3], trumpCard);
         checkCurrentPlayerMovePendingEvent(notifyPlayerCallbacks[4], false);
-        checkCardPlayedEvent(notifyPlayerCallbacks[5]);
+        checkCardPlayedEvent(notifyPlayerCallbacks[5], true);
         checkCurrentPlayerMovePendingEvent(notifyPlayerCallbacks[6], true);
         checkPlayerMoveRequestedEvent(notifyPlayerCallbacks[7]);
         notifyPlayerCallbacks.length = 0;
@@ -181,15 +245,15 @@ describe('GameProcessor Tests', function() {
         await gameProcessor.playCardWithId(gameProcessorTests_selfPlayerId, { cardName: selfPlayer.cards[0].cardName });
         checkNumCallbacks(10, 0, 0);
 
-        checkCardPlayedEvent(notifyPlayerCallbacks[0]);
-        checkCardsUpdatedEvent(notifyPlayerCallbacks[1]);
+        checkCardPlayedEvent(notifyPlayerCallbacks[0], true);
+        checkCardsUpdatedEvent(notifyPlayerCallbacks[1], expectedNumCards - 1);
         checkCurrentPlayerMovePendingEvent(notifyPlayerCallbacks[2], false);
-        checkCardPlayedEvent(notifyPlayerCallbacks[3]);
+        checkCardPlayedEvent(notifyPlayerCallbacks[3], true);
         checkScoresUpdatedEvent(notifyPlayerCallbacks[4]);
 
         checkInitialStateEvent(notifyPlayerCallbacks[5], trumpCard);
         checkCurrentPlayerMovePendingEvent(notifyPlayerCallbacks[6], false);
-        checkCardPlayedEvent(notifyPlayerCallbacks[7]);
+        checkCardPlayedEvent(notifyPlayerCallbacks[7], true);
         checkCurrentPlayerMovePendingEvent(notifyPlayerCallbacks[8], true);
         checkPlayerMoveRequestedEvent(notifyPlayerCallbacks[9]);
         notifyPlayerCallbacks.length = 0;
@@ -201,8 +265,8 @@ describe('GameProcessor Tests', function() {
         await gameProcessor.playCardWithId(gameProcessorTests_selfPlayerId, { cardName: selfPlayer.cards[0].cardName });
         checkNumCallbacks(3, 1, 0);
 
-        checkCardPlayedEvent(notifyPlayerCallbacks[0]);
-        checkCardsUpdatedEvent(notifyPlayerCallbacks[1]);
+        checkCardPlayedEvent(notifyPlayerCallbacks[0], false);
+        checkCardsUpdatedEvent(notifyPlayerCallbacks[1], expectedNumCards - 1);
         checkRoundFinishedEvent(notifyPlayerCallbacks[2]);
 
         assert.strictEqual(notifyStateChangedCallbacks.pop(), tf.GameState.waitingToDealNewCards);
@@ -215,10 +279,10 @@ describe('GameProcessor Tests', function() {
         await gameProcessor.playCardWithId(gameProcessorTests_selfPlayerId, { cardName: selfPlayer.cards[0].cardName });
         checkNumCallbacks(5, 1, 0);
 
-        checkCardPlayedEvent(notifyPlayerCallbacks[0]);
-        checkCardsUpdatedEvent(notifyPlayerCallbacks[1]);
+        checkCardPlayedEvent(notifyPlayerCallbacks[0], true);
+        checkCardsUpdatedEvent(notifyPlayerCallbacks[1], expectedNumCards - 1);
         checkCurrentPlayerMovePendingEvent(notifyPlayerCallbacks[2], false);
-        checkCardPlayedEvent(notifyPlayerCallbacks[3]);
+        checkCardPlayedEvent(notifyPlayerCallbacks[3], false);
         checkGameFinishedEvent(notifyPlayerCallbacks[4]);
 
         assert.strictEqual(notifyStateChangedCallbacks.pop(), tf.GameState.gameFinished);
@@ -241,7 +305,7 @@ describe('GameProcessor Tests', function() {
         await gameProcessor.addPlayer(selfPlayer, true);
         checkNumCallbacks(1, 0, 0);
         checkPlayerListChangedEvent(notifyPlayerCallbacks.pop(), true, 1);
-        
+
         await gameProcessor.fillWithAis();
         checkNumCallbacks(1, 1, 0);
         checkPlayerListChangedEvent(notifyPlayerCallbacks.pop(), false, 2);
@@ -282,5 +346,12 @@ describe('GameProcessor Tests', function() {
         await playerActionFunc_aiPlayerWins_selfPlayerLast(4);
         await playerActionFunc_aiPlayerWins_selfPlayerFirst(3);
         await playerActionFunc_gameFinished_selfPlayerWins(2);
+    });
+
+    describe('self player can rob', function() {
+        //
+        it('do game with self player robbing', async function() {
+            //
+        });
     });
 });
