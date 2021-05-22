@@ -95,6 +95,57 @@ function checkGameFinishedEvent(data) {
     assert.strictEqual(eventData.orderedPlayers[1].score < 25, true);
 }
 
+function checkIsValidDataOnlyRecursive(obj) {
+    var isValid = true;
+    for (let k of Object.keys(obj)) {
+        if (Array.isArray(obj[k])) {
+            for (let x of obj[k]) {
+                isValid = isValid && checkIsValidDataOnlyRecursive(x);
+            }
+        }
+        else if (typeof obj[k] === 'object' && obj[k] !== null) {
+            isValid = isValid && checkIsValidDataOnlyRecursive(obj[k]);
+        }
+        else {
+            isValid = isValid && (typeof obj[k] !== 'function' && obj[k] !== null);
+        }
+    }
+
+    return isValid;
+}
+
+describe("checkIsValidDataOnlyRecursive tests", function() {
+    it("empty object", function() {
+        var data = {};
+        assert.strictEqual(checkIsValidDataOnlyRecursive(data), true);
+    });
+
+    it("has null object", function() {
+        var data = { foo: null };
+        assert.strictEqual(checkIsValidDataOnlyRecursive(data), false);
+    });
+
+    it("has primitive member", function() {
+        var data = { foo: 1 };
+        assert.strictEqual(checkIsValidDataOnlyRecursive(data), true);
+    });
+
+    it("has object member", function() {
+        var data = { foo: { i: 1 } };
+        assert.strictEqual(checkIsValidDataOnlyRecursive(data), true);
+    });
+
+    it("has function member", function() {
+        var data = { foo: function() {} };
+        assert.strictEqual(checkIsValidDataOnlyRecursive(data), false);
+    });
+
+    it("has function submember", function() {
+        var data = { foo: { i: function() {} } };
+        assert.strictEqual(checkIsValidDataOnlyRecursive(data), false);
+    });
+});
+
 describe('GameProcessor Tests', function() {
     var shuffleStub = sinon.stub(tf.Helpers, 'shuffle');
     shuffleStub.callsFake(function(things) {}); //no-op
@@ -121,6 +172,7 @@ describe('GameProcessor Tests', function() {
 
     var notifyPlayerCallbacks = [];
     let notifyPlayerFunc = async function(playerId, data) {
+        assert.strictEqual(checkIsValidDataOnlyRecursive(data), true);
         notifyPlayerCallbacks.push({ playerId: playerId, data: data }); 
     };
     var notifyStateChangedCallbacks = [];
@@ -294,5 +346,12 @@ describe('GameProcessor Tests', function() {
         await playerActionFunc_aiPlayerWins_selfPlayerLast(4);
         await playerActionFunc_aiPlayerWins_selfPlayerFirst(3);
         await playerActionFunc_gameFinished_selfPlayerWins(2);
+    });
+
+    describe('self player can rob', function() {
+        //
+        it('do game with self player robbing', async function() {
+            //
+        });
     });
 });
