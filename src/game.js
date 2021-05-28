@@ -10,6 +10,15 @@ const GameState = Object.freeze({
     gameFinished: 6
 });
 
+// replacement for GameState, not wired up yet
+const GameState2 = Object.freeze({
+    notStarted: 0,
+    waitingForPlayers: 1,
+    readyToPlay: 2,
+    dealCards: 3,
+    cardsDealt: 4
+});
+
 class GameHelper {
     static getDeckModule() {
         if (typeof module !== 'undefined' && module.exports != null) {
@@ -42,6 +51,7 @@ class Game {
         this.currentPlayerIndex = 0;
         this.currentWinningPlayerAndCard = {};
         this.currentState = GameState.notStarted;
+        this.currentState2 = GameState2.notStarted;
         this.nextRoundFirstPlayerId = "";
     }
 }
@@ -50,6 +60,7 @@ class Game {
     let e = {};
     e.Game = Game;
     e.GameState = GameState;
+    e.GameState2 = GameState2;
     
     if (typeof module !== 'undefined' && module.exports != null) {
         module.exports = e;
