@@ -16,7 +16,9 @@ const GameState2 = Object.freeze({
     waitingForPlayers: 1,
     readyToPlay: 2,
     dealCards: 3,
-    cardsDealt: 4
+    cardsDealt: 4,
+    waitingForPlayerToRobTrumpCard: 5,
+    waitingForPlayerMove: 6
 });
 
 class GameHelper {
@@ -53,6 +55,8 @@ class Game {
         this.currentState = GameState.notStarted;
         this.currentState2 = GameState2.notStarted;
         this.nextRoundFirstPlayerId = "";
+        this.playerCanRobIndex = -1;
+        this.robbingFinished = false;
     }
 }
 
