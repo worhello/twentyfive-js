@@ -18,7 +18,9 @@ const GameState2 = Object.freeze({
     dealCards: 3,
     cardsDealt: 4,
     waitingForPlayerToRobTrumpCard: 5,
-    waitingForPlayerMove: 6
+    waitingForPlayerMove: 6,
+    roundFinished: 7,
+    gameFinished: 8
 });
 
 class GameHelper {
@@ -46,17 +48,21 @@ class Game {
         this.id = id;
         this.numberOfPlayers = numberOfPlayers;
         this.renegingDisabled = disableReneging;
+
         this.players = [];
         this.deck = new (GameHelper.getDeckModule()).Deck();
         this.trumpCard = new (GameHelper.getTrumpCardModule()).TrumpCard();
+
         this.roundPlayerAndCards = [];
         this.currentPlayerIndex = 0;
         this.currentWinningPlayerAndCard = {};
-        this.currentState = GameState.notStarted;
-        this.currentState2 = GameState2.notStarted;
         this.nextRoundFirstPlayerId = "";
+        this.currentState = GameState.notStarted; // deprecated
+        this.currentState2 = GameState2.notStarted;
         this.playerCanRobIndex = -1;
         this.robbingFinished = false;
+        this.roundFinished = false;
+        this.orderedPlayers = [];
     }
 }
 

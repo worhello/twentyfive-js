@@ -67,6 +67,12 @@ class GameStateMachine {
         else if (game.currentState2 == gameModule.GameState2.waitingForPlayerToRobTrumpCard) {
             game.currentState2 = GameStateMachine.handleWaitingForPlayerToRobTrumpCard(gameModule, game);
         }
+        else if (game.currentState2 == gameModule.GameState2.waitingForPlayerMove) {
+            game.currentState2 = GameStateMachine.handleWaitingForPlayerMove(gameModule, game);
+        }
+        else if (game.currentState2 == gameModule.GameState2.roundFinished) {
+            game.currentState2 = GameStateMachine.handleRoundFinished(gameModule, game);
+        }
     }
 
     static gameIsValid(game) {
@@ -203,6 +209,116 @@ class GameStateMachine {
         }
 
         return gameModule.GameState2.waitingForPlayerMove;
+    }
+
+    // public
+    static playCard(game, player, playedCardName) {
+        let playedCard = (GameStateMachineModuleHelper.getPlayerModule()).PlayerLogic.playCard(player, playedCardName);
+        let currentMove = { "player": player, "card": playedCard };
+        game.roundPlayerAndCards.push(currentMove);
+
+        let isNewWinningCard = GameStateMachine.updateCurrentWinningCard(game, currentMove);
+
+        game.currentPlayerIndex++;
+        game.roundFinished = game.currentPlayerIndex == game.players.length;
+
+        return isNewWinningCard;
+    }
+
+    static updateCurrentWinningCard(game, currentMove) {
+        let gameLogic = GameStateMachineModuleHelper.getGameLogicModule();
+        let currentWinningCard = gameLogic.getWinningCard(game.trumpCard, GameStateMachine.getPlayedCards(game));
+        if (!game.currentWinningPlayerAndCard.card || !gameLogic.isSameCard(game.currentWinningPlayerAndCard.card, currentWinningCard)) {
+            game.currentWinningPlayerAndCard = currentMove;
+            return true;
+        }
+        return false;
+    }
+
+    static getPlayedCards(game) {
+        return game.roundPlayerAndCards.map(pAC => pAC.card);
+    }
+
+    static handleWaitingForPlayerMove(gameModule, game) {
+        if (game.roundFinished) {
+            GameStateMachine.evaluateRoundEnd(game);
+            return gameModule.GameState2.roundFinished;
+        }
+
+        return gameModule.GameState2.waitingForPlayerMove;
+    }
+
+    static evaluateRoundEnd(game) {
+        let playedCards = GameStateMachine.getPlayedCards(game);
+        let winningCard = (GameStateMachineModuleHelper.getGameLogicModule()).getWinningCard(game.trumpCard, playedCards);
+        let winningPlayer = game.roundPlayerAndCards.find(pAC => pAC.card == winningCard).player;
+
+        game.nextRoundFirstPlayerId = winningPlayer.id;
+        game.players.find(p => p.id == game.nextRoundFirstPlayerId).score += 5;
+
+        game.orderedPlayers.length = 0;
+        game.orderedPlayers = GameStateMachine.getSortedListOfPlayers(game);
+    }
+
+    static getSortedListOfPlayers(game) {
+        let playersCopy = [...game.players];
+        let cmpFunc = function(a, b) {
+            if (a.score < b.score) {
+                return 1;
+            }
+            if (a.score > b.score) {
+                return -1;
+            }
+            return 0;
+        }
+        playersCopy.sort(cmpFunc);
+        return playersCopy;
+    }
+
+    static handleRoundFinished(gameModule, game) {
+        var winnerWithHighestScore = game.players[0];
+        game.players.map(function(p) {
+            if (p.score > winnerWithHighestScore.score) {
+                winnerWithHighestScore = p;
+            }
+        });
+        if (winnerWithHighestScore.score >= 25) {
+            return gameModule.GameState2.gameFinished;
+        }
+
+        var nextGameState2 = gameModule.GameState2.waitingForPlayerMove;
+        if (GameStateMachine.mustDealNewCards(game)) {
+            game.nextRoundFirstPlayerId = game.orderedPlayers[0].id;
+            nextGameState2 = gameModule.GameState2.dealCards;
+        }
+
+        // reset game state
+        GameStateMachine.rotatePlayers(game);
+        GameStateMachine.rotateDealer(game);
+        game.roundPlayerAndCards.length = 0;
+        game.currentPlayerIndex = 0;
+        game.currentWinningPlayerAndCard = {};
+        game.roundFinished = false;
+        return nextGameState2;
+    }
+
+    static rotatePlayers(game) {
+        let playersCopy = [...game.players];
+        let winningPlayerIndex = playersCopy.findIndex(p => p.id == game.nextRoundFirstPlayerId);
+        var firstHalf = playersCopy.slice(winningPlayerIndex, playersCopy.length);
+        let secondHalf = playersCopy.slice(0, winningPlayerIndex);
+        game.players = firstHalf.concat(secondHalf);
+    }
+
+    static mustDealNewCards(game) {
+        var needMoreCards = true;
+        for (var i = 0; i < game.players.length; i++) {
+            if (game.players[i].cards.length > 0) {
+                needMoreCards = false;
+                break;
+            }
+        }
+        return needMoreCards;
     }
 }
 
