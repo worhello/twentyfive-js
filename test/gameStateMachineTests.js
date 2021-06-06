@@ -205,6 +205,13 @@ describe("GameStateMachineTests.calculateGameState", function() {
                 assert.strictEqual(game.roundRobbingInfo.robbingFinished, true);
                 assert.strictEqual(game.trumpCard.hasBeenStolen, true);
             });
+
+            it("handle as real player - skip", () => {
+                let player = game.players[game.roundRobbingInfo.playerCanRobIndex];
+                tf.GameStateMachine.skipRobbing(game);
+                assert.strictEqual(game.roundRobbingInfo.robbingFinished, true);
+                assert.strictEqual(game.trumpCard.hasBeenStolen, false);
+            });
         });
     });
 
@@ -224,8 +231,7 @@ describe("GameStateMachineTests.calculateGameState", function() {
             let player = game.players[game.currentHandInfo.currentPlayerIndex];
             assert.strictEqual(player.id, playerId);
 
-            let cardName = player.cards[0].cardName;
-            let isNewWinningCard = tf.GameStateMachine.playCard(game, player, cardName);
+            let isNewWinningCard = tf.GameStateMachine.aiPlayCard(game, player);
             assert.strictEqual(isNewWinningCard, expectedNewWinningCard);
         }
 
@@ -255,7 +261,6 @@ describe("GameStateMachineTests.calculateGameState", function() {
         });
 
         it("play full round", () => {
-            // 2 of hearts vs 7 of hearts - player #1 wins
             playNextPlayerCard(player0Id, true);
             tf.GameStateMachine.updateToNextGameState(game);
             assert.strictEqual(game.currentState2, tf.GameState2.waitingForPlayerMove);
@@ -268,7 +273,6 @@ describe("GameStateMachineTests.calculateGameState", function() {
             tf.GameStateMachine.updateToNextGameState(game);
             assert.strictEqual(game.currentState2, tf.GameState2.waitingForPlayerMove);
 
-            // 8 of hearts vs 3 of hearts - player #1 wins (player array has been rotated)
             playNextPlayerCard(player1Id, true);
             tf.GameStateMachine.updateToNextGameState(game);
             assert.strictEqual(game.currentState2, tf.GameState2.waitingForPlayerMove);
@@ -281,7 +285,6 @@ describe("GameStateMachineTests.calculateGameState", function() {
             tf.GameStateMachine.updateToNextGameState(game);
             assert.strictEqual(game.currentState2, tf.GameState2.waitingForPlayerMove);
 
-            // 9 of hearts vs 4 of hearts - player #1 wins (player array has not been rotated since the last hand)
             playNextPlayerCard(player1Id, true);
             tf.GameStateMachine.updateToNextGameState(game);
             assert.strictEqual(game.currentState2, tf.GameState2.waitingForPlayerMove);
@@ -294,7 +297,6 @@ describe("GameStateMachineTests.calculateGameState", function() {
             tf.GameStateMachine.updateToNextGameState(game);
             assert.strictEqual(game.currentState2, tf.GameState2.waitingForPlayerMove);
 
-            // 10 of hearts vs 5 of hearts - player #0 wins (player array has not been rotated since the last hand)
             playNextPlayerCard(player1Id, true);
             tf.GameStateMachine.updateToNextGameState(game);
             assert.strictEqual(game.currentState2, tf.GameState2.waitingForPlayerMove);
@@ -307,7 +309,6 @@ describe("GameStateMachineTests.calculateGameState", function() {
             tf.GameStateMachine.updateToNextGameState(game);
             assert.strictEqual(game.currentState2, tf.GameState2.waitingForPlayerMove);
 
-            // jack of hearts vs 6 of hearts - player #1 wins (player array has been rotated since the last hand)
             playNextPlayerCard(player0Id, true);
             tf.GameStateMachine.updateToNextGameState(game);
             assert.strictEqual(game.currentState2, tf.GameState2.waitingForPlayerMove);
@@ -333,7 +334,6 @@ describe("GameStateMachineTests.calculateGameState", function() {
             tf.GameStateMachine.updateToNextGameState(game);
             assert.strictEqual(game.currentState2, tf.GameState2.waitingForPlayerMove);
 
-            // ace of diamonds vs 5 of diamonds - player #0 wins (player array has been rotated since last round)
             playNextPlayerCard(player1Id, true);
             tf.GameStateMachine.updateToNextGameState(game);
             assert.strictEqual(game.currentState2, tf.GameState2.waitingForPlayerMove);
@@ -346,7 +346,6 @@ describe("GameStateMachineTests.calculateGameState", function() {
             tf.GameStateMachine.updateToNextGameState(game);
             assert.strictEqual(game.currentState2, tf.GameState2.waitingForPlayerMove);
 
-            // 6 of diamonds vs 2 of diamonds - player #0 wins (player array has been rotated since last round)
             playNextPlayerCard(player0Id, true);
             tf.GameStateMachine.updateToNextGameState(game);
             assert.strictEqual(game.currentState2, tf.GameState2.waitingForPlayerMove);
@@ -359,7 +358,6 @@ describe("GameStateMachineTests.calculateGameState", function() {
             tf.GameStateMachine.updateToNextGameState(game);
             assert.strictEqual(game.currentState2, tf.GameState2.waitingForPlayerMove);
 
-            // 7 of diamonds vs 3 of diamonds - player #0 wins (player array has not been rotated since last round)
             playNextPlayerCard(player0Id, true);
             tf.GameStateMachine.updateToNextGameState(game);
             assert.strictEqual(game.currentState2, tf.GameState2.waitingForPlayerMove);
@@ -372,7 +370,6 @@ describe("GameStateMachineTests.calculateGameState", function() {
             tf.GameStateMachine.updateToNextGameState(game);
             assert.strictEqual(game.currentState2, tf.GameState2.waitingForPlayerMove);
 
-            // 7 of diamonds vs 3 of diamonds - player #0 wins (player array has not been rotated since last round)
             playNextPlayerCard(player0Id, true);
             tf.GameStateMachine.updateToNextGameState(game);
             assert.strictEqual(game.currentState2, tf.GameState2.waitingForPlayerMove);

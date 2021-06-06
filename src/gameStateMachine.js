@@ -198,6 +198,10 @@ class GameStateMachine {
         game.roundRobbingInfo.robbingFinished = true;
     }
 
+    static skipRobbing(game) {
+        game.roundRobbingInfo.robbingFinished = true;
+    }
+
     static aiWillRob(playerModule, player) {
         // TODO - seed player will rob chance for specific player
         return playerModule.PlayerLogic.aiWillRobCard();
@@ -214,6 +218,17 @@ class GameStateMachine {
     // public
     static playCard(game, player, playedCardName) {
         let playedCard = (GameStateMachineModuleHelper.getPlayerModule()).PlayerLogic.playCard(player, playedCardName);
+        return GameStateMachine.handleCardPlayed(game, player, playedCard);
+    }
+
+    // public
+    static aiPlayCard(game, player) {
+        let playedCards = GameStateMachine.getPlayedCards(game);
+        let card = (GameStateMachineModuleHelper.getPlayerModule()).PlayerLogic.aiPlayCard(player, playedCards, game.trumpCard);
+        return GameStateMachine.handleCardPlayed(game, player, card);
+    }
+
+    static handleCardPlayed(game, player, playedCard) {
         let currentMove = { "player": player, "card": playedCard };
         game.currentHandInfo.roundPlayerAndCards.push(currentMove);
 

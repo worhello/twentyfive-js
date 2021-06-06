@@ -24,8 +24,7 @@ class PlayerLogic
 
     static aiPlayCard(player, playedCards, trumpCard) {
         let cardToPlay = PlayerLogic.getGameLogicModule().getBestCardFromOptions(player.cards, trumpCard, playedCards);
-        PlayerLogic.playCard(player, cardToPlay.cardName);
-        return cardToPlay;
+        return PlayerLogic.playCard(player, cardToPlay.cardName);
     }
 
     static aiWillRobCard() {
