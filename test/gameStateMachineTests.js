@@ -162,7 +162,7 @@ describe("GameStateMachineTests.calculateGameState", function() {
             tf.GameStateMachine.updateToNextGameState(game);
 
             assert.strictEqual(game.currentState2, tf.GameState2.waitingForPlayerToRobTrumpCard);
-            assert.strictEqual(game.robbingFinished, false);
+            assert.strictEqual(game.roundRobbingInfo.robbingFinished, false);
 
             tf.GameStateMachine.updateToNextGameState(game);
             assert.strictEqual(game.currentState2, tf.GameState2.waitingForPlayerToRobTrumpCard);
@@ -176,9 +176,9 @@ describe("GameStateMachineTests.calculateGameState", function() {
                 tf.GameStateMachine.updateToNextGameState(game);
 
                 assert.strictEqual(game.currentState2, tf.GameState2.waitingForPlayerToRobTrumpCard);
-                assert.strictEqual(game.playerCanRobIndex, 0);
-                assert.strictEqual(game.robbingFinished, false);
-                assert.strictEqual(game.playerCanRobIndex >= 0, true);
+                assert.strictEqual(game.roundRobbingInfo.playerCanRobIndex, 0);
+                assert.strictEqual(game.roundRobbingInfo.robbingFinished, false);
+                assert.strictEqual(game.roundRobbingInfo.playerCanRobIndex >= 0, true);
             });
 
             afterEach(() => {
@@ -188,21 +188,21 @@ describe("GameStateMachineTests.calculateGameState", function() {
 
             it("handle as AI - AI chooses not to rob", () => {
                 tf.GameStateMachine.handleAiPlayerRob(game);
-                assert.strictEqual(game.robbingFinished, true);
+                assert.strictEqual(game.roundRobbingInfo.robbingFinished, true);
                 assert.strictEqual(game.trumpCard.hasBeenStolen, false);
             });
 
             it("handle as AI - AI chooses to rob", () => {
                 aiWillRobCardStub.callsFake(function() { return true; });
                 tf.GameStateMachine.handleAiPlayerRob(game);
-                assert.strictEqual(game.robbingFinished, true);
+                assert.strictEqual(game.roundRobbingInfo.robbingFinished, true);
                 assert.strictEqual(game.trumpCard.hasBeenStolen, true);
             });
 
             it("handle as real player", () => {
-                let player = game.players[game.playerCanRobIndex];
+                let player = game.players[game.roundRobbingInfo.playerCanRobIndex];
                 tf.GameStateMachine.robCard(game, player, player.cards[4]);
-                assert.strictEqual(game.robbingFinished, true);
+                assert.strictEqual(game.roundRobbingInfo.robbingFinished, true);
                 assert.strictEqual(game.trumpCard.hasBeenStolen, true);
             });
         });
@@ -327,7 +327,7 @@ describe("GameStateMachineTests.calculateGameState", function() {
             assert.strictEqual(game.currentState2, tf.GameState2.waitingForPlayerToRobTrumpCard);
             aiWillRobCardStub.callsFake(function() { return true; });
             tf.GameStateMachine.handleAiPlayerRob(game);
-            assert.strictEqual(game.robbingFinished, true);
+            assert.strictEqual(game.roundRobbingInfo.robbingFinished, true);
             assert.strictEqual(game.trumpCard.hasBeenStolen, true);
 
             tf.GameStateMachine.updateToNextGameState(game);

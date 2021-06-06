@@ -121,7 +121,7 @@ class GameStateMachine {
     static handleCardsDealt(gameModule, game) {
         let playerCanRob = GameStateMachine.updatePlayerCanRob(game);
         if (playerCanRob) {
-            game.robbingFinished = false;
+            game.roundRobbingInfo.robbingFinished = false;
             return gameModule.GameState2.waitingForPlayerToRobTrumpCard;
         }
 
@@ -129,14 +129,14 @@ class GameStateMachine {
     }
 
     static updatePlayerCanRob(game) {
-        game.playerCanRobIndex = -1;
+        game.roundRobbingInfo.playerCanRobIndex = -1;
 
         // first check dealer
         let dealerIndex = game.players.findIndex(p => p.isDealer == true);
         let dealer = game.players[dealerIndex];
         let dealerNeedsNotification = GameStateMachine.playerCanRobTrumpCard(game, dealer);
         if (dealerNeedsNotification) {
-            game.playerCanRobIndex = dealerIndex;
+            game.roundRobbingInfo.playerCanRobIndex = dealerIndex;
             return true;
         }
 
@@ -149,7 +149,7 @@ class GameStateMachine {
 
             let playerNeedsNotification = GameStateMachine.playerCanRobTrumpCard(game, player);
             if (playerNeedsNotification) {
-                game.playerCanRobIndex = i;
+                game.roundRobbingInfo.playerCanRobIndex = i;
                 return true;
             }
         }
@@ -178,13 +178,13 @@ class GameStateMachine {
     static handleAiPlayerRob(game) {
         let gameModule = GameStateMachineModuleHelper.getGameModule();
         let playerModule = GameStateMachineModuleHelper.getPlayerModule();
-        if (game.currentState2 != gameModule.GameState2.waitingForPlayerToRobTrumpCard || game.playerCanRobIndex == -1) {
+        if (game.currentState2 != gameModule.GameState2.waitingForPlayerToRobTrumpCard || game.roundRobbingInfo.playerCanRobIndex == -1) {
             return;
         }
 
-        let player = game.players[game.playerCanRobIndex];
+        let player = game.players[game.roundRobbingInfo.playerCanRobIndex];
         if (!GameStateMachine.aiWillRob(playerModule, player)) {
-            game.robbingFinished = true;
+            game.roundRobbingInfo.robbingFinished = true;
             return;
         }
 
@@ -195,7 +195,7 @@ class GameStateMachine {
         (GameStateMachineModuleHelper.getPlayerModule()).PlayerLogic.playCard(player, droppedCardName);
         player.cards.push(game.trumpCard.card);
         (GameStateMachineModuleHelper.getTrumpCardModule()).TrumpCardLogic.steal(game.trumpCard, player);
-        game.robbingFinished = true;
+        game.roundRobbingInfo.robbingFinished = true;
     }
 
     static aiWillRob(playerModule, player) {
@@ -204,7 +204,7 @@ class GameStateMachine {
     }
 
     static handleWaitingForPlayerToRobTrumpCard(gameModule, game) {
-        if (!game.robbingFinished) {
+        if (!game.roundRobbingInfo.robbingFinished) {
             return gameModule.GameState2.waitingForPlayerToRobTrumpCard;
         }
 

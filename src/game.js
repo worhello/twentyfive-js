@@ -43,6 +43,29 @@ class GameHelper {
     }
 }
 
+class RoundRobbingInfo {
+    constructor() {
+        this.playerCanRobIndex = -1;
+        this.robbingFinished = false;
+    }
+}
+
+class HandInfo {
+    constructor() {
+        this.playerAndCards = [];
+        this.currentPlayerIndex = 0;
+        this.currentWinningPlayerAndCard = {};
+        this.handFinished = false;
+    }
+}
+
+class EndOfHandInfo {
+    constructor() {
+        this.nextRoundFirstPlayerId = "";
+        this.orderedPlayers = [];
+    }
+}
+
 class Game {
     constructor(id, numberOfPlayers, disableReneging) {
         this.id = id;
@@ -53,15 +76,21 @@ class Game {
         this.deck = new (GameHelper.getDeckModule()).Deck();
         this.trumpCard = new (GameHelper.getTrumpCardModule()).TrumpCard();
 
+        this.currentState = GameState.notStarted; // deprecated
+        this.currentState2 = GameState2.notStarted;
+
+        this.roundRobbingInfo = new RoundRobbingInfo();
+        this.playerCanRobIndex = -1; // deprecated
+        this.roundRobbingInfo.robbingFinished = false; // deprecated
+
+        this.currentHandInfo = new HandInfo();
         this.roundPlayerAndCards = [];
         this.currentPlayerIndex = 0;
         this.currentWinningPlayerAndCard = {};
-        this.nextRoundFirstPlayerId = "";
-        this.currentState = GameState.notStarted; // deprecated
-        this.currentState2 = GameState2.notStarted;
-        this.playerCanRobIndex = -1;
-        this.robbingFinished = false;
         this.roundFinished = false;
+
+        this.endOfHandInfo = new EndOfHandInfo();
+        this.nextRoundFirstPlayerId = "";
         this.orderedPlayers = [];
     }
 }
