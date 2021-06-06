@@ -81,9 +81,9 @@ describe("GameStateMachineTests.calculateGameState", function() {
         assert.strictEqual(game.numberOfPlayers, numPlayers);
         assert.strictEqual(game.renegingDisabled, renegingDisabled);
         assert.strictEqual(game.players.length, 0);
-        assert.strictEqual(game.roundPlayerAndCards.length, 0);
-        assert.strictEqual(game.currentPlayerIndex, 0);
-        assert.strictEqual(Object.keys(game.currentWinningPlayerAndCard).length, 0);
+        assert.strictEqual(game.currentHandInfo.roundPlayerAndCards.length, 0);
+        assert.strictEqual(game.currentHandInfo.currentPlayerIndex, 0);
+        assert.strictEqual(Object.keys(game.currentHandInfo.currentWinningPlayerAndCard).length, 0);
     });
 
     it("notStarted state due to too many players requested", () => {
@@ -217,11 +217,11 @@ describe("GameStateMachineTests.calculateGameState", function() {
 
             tf.GameStateMachine.updateToNextGameState(game);
             assert.strictEqual(game.currentState2, tf.GameState2.waitingForPlayerMove);
-            assert.strictEqual(game.currentPlayerIndex, 0);
+            assert.strictEqual(game.currentHandInfo.currentPlayerIndex, 0);
         });
 
         let playNextPlayerCard = function(playerId, expectedNewWinningCard) {
-            let player = game.players[game.currentPlayerIndex];
+            let player = game.players[game.currentHandInfo.currentPlayerIndex];
             assert.strictEqual(player.id, playerId);
 
             let cardName = player.cards[0].cardName;
@@ -240,14 +240,14 @@ describe("GameStateMachineTests.calculateGameState", function() {
 
             tf.GameStateMachine.updateToNextGameState(game);
             assert.strictEqual(game.currentState2, tf.GameState2.waitingForPlayerMove);
-            assert.strictEqual(game.currentPlayerIndex, 1);
+            assert.strictEqual(game.currentHandInfo.currentPlayerIndex, 1);
             assert.strictEqual(game.players.every((p) => p.score == 0), true);
 
             playNextPlayerCard(player1Id, true);
             assert.strictEqual(game.players.every((p) => p.score == 0), true);
 
             tf.GameStateMachine.updateToNextGameState(game);
-            assert.strictEqual(game.currentPlayerIndex, 2);
+            assert.strictEqual(game.currentHandInfo.currentPlayerIndex, 2);
             assert.strictEqual(game.currentState2, tf.GameState2.roundFinished);
 
             assert.strictEqual(game.players.every((p) => p.score == 0), false);

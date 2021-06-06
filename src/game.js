@@ -52,7 +52,7 @@ class RoundRobbingInfo {
 
 class HandInfo {
     constructor() {
-        this.playerAndCards = [];
+        this.roundPlayerAndCards = [];
         this.currentPlayerIndex = 0;
         this.currentWinningPlayerAndCard = {};
         this.handFinished = false;
@@ -84,10 +84,10 @@ class Game {
         this.robbingFinished = false; // deprecated
 
         this.currentHandInfo = new HandInfo();
-        this.roundPlayerAndCards = [];
-        this.currentPlayerIndex = 0;
-        this.currentWinningPlayerAndCard = {};
-        this.roundFinished = false;
+        this.roundPlayerAndCards = []; // deprecated
+        this.currentPlayerIndex = 0; // deprecated
+        this.currentWinningPlayerAndCard = {}; // deprecated
+        this.roundFinished = false; // deprecated
 
         this.endOfHandInfo = new EndOfHandInfo();
         this.nextRoundFirstPlayerId = ""; // deprecated

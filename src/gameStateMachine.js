@@ -215,12 +215,12 @@ class GameStateMachine {
     static playCard(game, player, playedCardName) {
         let playedCard = (GameStateMachineModuleHelper.getPlayerModule()).PlayerLogic.playCard(player, playedCardName);
         let currentMove = { "player": player, "card": playedCard };
-        game.roundPlayerAndCards.push(currentMove);
+        game.currentHandInfo.roundPlayerAndCards.push(currentMove);
 
         let isNewWinningCard = GameStateMachine.updateCurrentWinningCard(game, currentMove);
 
-        game.currentPlayerIndex++;
-        game.roundFinished = game.currentPlayerIndex == game.players.length;
+        game.currentHandInfo.currentPlayerIndex++;
+        game.currentHandInfo.roundFinished = game.currentHandInfo.currentPlayerIndex == game.players.length;
 
         return isNewWinningCard;
     }
@@ -228,19 +228,19 @@ class GameStateMachine {
     static updateCurrentWinningCard(game, currentMove) {
         let gameLogic = GameStateMachineModuleHelper.getGameLogicModule();
         let currentWinningCard = gameLogic.getWinningCard(game.trumpCard, GameStateMachine.getPlayedCards(game));
-        if (!game.currentWinningPlayerAndCard.card || !gameLogic.isSameCard(game.currentWinningPlayerAndCard.card, currentWinningCard)) {
-            game.currentWinningPlayerAndCard = currentMove;
+        if (!game.currentHandInfo.currentWinningPlayerAndCard.card || !gameLogic.isSameCard(game.currentHandInfo.currentWinningPlayerAndCard.card, currentWinningCard)) {
+            game.currentHandInfo.currentWinningPlayerAndCard = currentMove;
             return true;
         }
         return false;
     }
 
     static getPlayedCards(game) {
-        return game.roundPlayerAndCards.map(pAC => pAC.card);
+        return game.currentHandInfo.roundPlayerAndCards.map(pAC => pAC.card);
     }
 
     static handleWaitingForPlayerMove(gameModule, game) {
-        if (game.roundFinished) {
+        if (game.currentHandInfo.roundFinished) {
             GameStateMachine.evaluateRoundEnd(game);
             return gameModule.GameState2.roundFinished;
         }
@@ -251,7 +251,7 @@ class GameStateMachine {
     static evaluateRoundEnd(game) {
         let playedCards = GameStateMachine.getPlayedCards(game);
         let winningCard = (GameStateMachineModuleHelper.getGameLogicModule()).getWinningCard(game.trumpCard, playedCards);
-        let winningPlayer = game.roundPlayerAndCards.find(pAC => pAC.card == winningCard).player;
+        let winningPlayer = game.currentHandInfo.roundPlayerAndCards.find(pAC => pAC.card == winningCard).player;
 
         game.endOfHandInfo.nextRoundFirstPlayerId = winningPlayer.id;
         game.players.find(p => p.id == game.endOfHandInfo.nextRoundFirstPlayerId).score += 5;
@@ -295,10 +295,10 @@ class GameStateMachine {
         // reset game state
         GameStateMachine.rotatePlayers(game);
         GameStateMachine.rotateDealer(game);
-        game.roundPlayerAndCards.length = 0;
-        game.currentPlayerIndex = 0;
-        game.currentWinningPlayerAndCard = {};
-        game.roundFinished = false;
+        game.currentHandInfo.roundPlayerAndCards.length = 0;
+        game.currentHandInfo.currentPlayerIndex = 0;
+        game.currentHandInfo.currentWinningPlayerAndCard = {};
+        game.currentHandInfo.roundFinished = false;
         return nextGameState2;
     }
 
