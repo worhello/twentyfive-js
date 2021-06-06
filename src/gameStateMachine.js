@@ -253,11 +253,11 @@ class GameStateMachine {
         let winningCard = (GameStateMachineModuleHelper.getGameLogicModule()).getWinningCard(game.trumpCard, playedCards);
         let winningPlayer = game.roundPlayerAndCards.find(pAC => pAC.card == winningCard).player;
 
-        game.nextRoundFirstPlayerId = winningPlayer.id;
-        game.players.find(p => p.id == game.nextRoundFirstPlayerId).score += 5;
+        game.endOfHandInfo.nextRoundFirstPlayerId = winningPlayer.id;
+        game.players.find(p => p.id == game.endOfHandInfo.nextRoundFirstPlayerId).score += 5;
 
-        game.orderedPlayers.length = 0;
-        game.orderedPlayers = GameStateMachine.getSortedListOfPlayers(game);
+        game.endOfHandInfo.orderedPlayers.length = 0;
+        game.endOfHandInfo.orderedPlayers = GameStateMachine.getSortedListOfPlayers(game);
     }
 
     static getSortedListOfPlayers(game) {
@@ -288,7 +288,7 @@ class GameStateMachine {
 
         var nextGameState2 = gameModule.GameState2.waitingForPlayerMove;
         if (GameStateMachine.mustDealNewCards(game)) {
-            game.nextRoundFirstPlayerId = game.orderedPlayers[0].id;
+            game.endOfHandInfo.nextRoundFirstPlayerId = game.endOfHandInfo.orderedPlayers[0].id;
             nextGameState2 = gameModule.GameState2.dealCards;
         }
 
@@ -304,7 +304,7 @@ class GameStateMachine {
 
     static rotatePlayers(game) {
         let playersCopy = [...game.players];
-        let winningPlayerIndex = playersCopy.findIndex(p => p.id == game.nextRoundFirstPlayerId);
+        let winningPlayerIndex = playersCopy.findIndex(p => p.id == game.endOfHandInfo.nextRoundFirstPlayerId);
         var firstHalf = playersCopy.slice(winningPlayerIndex, playersCopy.length);
         let secondHalf = playersCopy.slice(0, winningPlayerIndex);
         game.players = firstHalf.concat(secondHalf);

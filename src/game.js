@@ -81,7 +81,7 @@ class Game {
 
         this.roundRobbingInfo = new RoundRobbingInfo();
         this.playerCanRobIndex = -1; // deprecated
-        this.roundRobbingInfo.robbingFinished = false; // deprecated
+        this.robbingFinished = false; // deprecated
 
         this.currentHandInfo = new HandInfo();
         this.roundPlayerAndCards = [];
@@ -90,8 +90,8 @@ class Game {
         this.roundFinished = false;
 
         this.endOfHandInfo = new EndOfHandInfo();
-        this.nextRoundFirstPlayerId = "";
-        this.orderedPlayers = [];
+        this.nextRoundFirstPlayerId = ""; // deprecated
+        this.orderedPlayers = []; // deprecated
     }
 }
 

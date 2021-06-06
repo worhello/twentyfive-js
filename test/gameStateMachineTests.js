@@ -212,7 +212,7 @@ describe("GameStateMachineTests.calculateGameState", function() {
         beforeEach(() => {
             aiWillRobCardStub.callsFake(function() { return false; });
             setGameToCardsDealt(game, false);
-            assert.strictEqual(game.nextRoundFirstPlayerId, "");
+            assert.strictEqual(game.endOfHandInfo.nextRoundFirstPlayerId, "");
             assert.strictEqual(game.players.every((p) => p.score == 0), true);
 
             tf.GameStateMachine.updateToNextGameState(game);
@@ -384,6 +384,10 @@ describe("GameStateMachineTests.calculateGameState", function() {
 
             tf.GameStateMachine.updateToNextGameState(game);
             assert.strictEqual(game.currentState2, tf.GameState2.gameFinished);
+
+            assert.strictEqual(game.endOfHandInfo.orderedPlayers.length, 2);
+            assert.strictEqual(game.endOfHandInfo.orderedPlayers[0].id, player0Id);
+            assert.strictEqual(game.endOfHandInfo.orderedPlayers[1].id, player1Id);
         });
     });
 });
