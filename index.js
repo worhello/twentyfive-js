@@ -8,6 +8,7 @@ let deck = require('./src/deck.js');
 let trumpCard = require('./src/trumpCard.js');
 let game = require('./src/game.js');
 let gameProcessor = require('./src/gameProcessor.js'); 
+let gameStateMachine = require('./src/gameStateMachine.js'); 
 
 module.exports.Helpers = helpers.Helpers;
 
@@ -24,4 +25,6 @@ module.exports.TrumpCard = trumpCard.TrumpCard;
 
 module.exports.Game = game.Game;
 module.exports.GameState = game.GameState;
+module.exports.GameState2 = game.GameState2;
 module.exports.GameProcessor = gameProcessor.GameProcessor;
+module.exports.GameStateMachine = gameStateMachine.GameStateMachine;
