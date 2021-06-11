@@ -35,6 +35,7 @@ function setGameToReadyToPlay(game) {
     tf.GameStateMachine.rotateDealer(game);
     game.players[0].id = player0Id;
     game.players[1].id = player1Id;
+    game.currentHandInfo.needMoreCardsDealt = true;
 }
 
 function setGameToDealCards(game) {
@@ -152,6 +153,7 @@ describe("GameStateMachineTests.calculateGameState", function() {
                 assert.strictEqual(p.cards.length, 5);
             }
             testHelpers.assertCardsEqual(game.trumpCard.card, { suit: tf.CardSuits.hearts, value: tf.CardValues.jack });
+            assert.strictEqual(game.currentHandInfo.needMoreCardsDealt, false);
         });
     });
 
@@ -225,6 +227,7 @@ describe("GameStateMachineTests.calculateGameState", function() {
             tf.GameStateMachine.updateToNextGameState(game);
             assert.strictEqual(game.currentState2, tf.GameState2.waitingForPlayerMove);
             assert.strictEqual(game.currentHandInfo.currentPlayerIndex, 0);
+            assert.strictEqual(game.currentHandInfo.needMoreCardsDealt, false);
         });
 
         let playNextPlayerCard = function(playerId, expectedNewWinningCard) {
@@ -317,12 +320,14 @@ describe("GameStateMachineTests.calculateGameState", function() {
             tf.GameStateMachine.updateToNextGameState(game);
             assert.strictEqual(game.currentState2, tf.GameState2.roundFinished);
             checkScores(game, 5, 20);
+            assert.strictEqual(game.currentHandInfo.needMoreCardsDealt, true);
 
             tf.GameStateMachine.updateToNextGameState(game);
             assert.strictEqual(game.currentState2, tf.GameState2.dealCards);
 
             tf.GameStateMachine.updateToNextGameState(game);
             assert.strictEqual(game.currentState2, tf.GameState2.cardsDealt);
+            assert.strictEqual(game.currentHandInfo.needMoreCardsDealt, false);
 
             tf.GameStateMachine.updateToNextGameState(game);
             assert.strictEqual(game.currentState2, tf.GameState2.waitingForPlayerToRobTrumpCard);
@@ -354,6 +359,7 @@ describe("GameStateMachineTests.calculateGameState", function() {
             tf.GameStateMachine.updateToNextGameState(game);
             assert.strictEqual(game.currentState2, tf.GameState2.roundFinished);
             checkScores(game, 15, 20);
+            assert.strictEqual(game.endOfHandInfo.gameFinished, false);
 
             tf.GameStateMachine.updateToNextGameState(game);
             assert.strictEqual(game.currentState2, tf.GameState2.waitingForPlayerMove);
@@ -366,6 +372,7 @@ describe("GameStateMachineTests.calculateGameState", function() {
             tf.GameStateMachine.updateToNextGameState(game);
             assert.strictEqual(game.currentState2, tf.GameState2.roundFinished);
             checkScores(game, 20, 20);
+            assert.strictEqual(game.endOfHandInfo.gameFinished, false);
 
             tf.GameStateMachine.updateToNextGameState(game);
             assert.strictEqual(game.currentState2, tf.GameState2.waitingForPlayerMove);
@@ -378,6 +385,7 @@ describe("GameStateMachineTests.calculateGameState", function() {
             tf.GameStateMachine.updateToNextGameState(game);
             assert.strictEqual(game.currentState2, tf.GameState2.roundFinished);
             checkScores(game, 25, 20);
+            assert.strictEqual(game.endOfHandInfo.gameFinished, true);
 
             tf.GameStateMachine.updateToNextGameState(game);
             assert.strictEqual(game.currentState2, tf.GameState2.gameFinished);

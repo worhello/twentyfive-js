@@ -56,6 +56,7 @@ class HandInfo {
         this.currentPlayerIndex = 0;
         this.currentWinningPlayerAndCard = {};
         this.handFinished = false;
+        this.needMoreCardsDealt = true;
     }
 }
 
@@ -63,6 +64,7 @@ class EndOfHandInfo {
     constructor() {
         this.nextRoundFirstPlayerId = "";
         this.orderedPlayers = [];
+        this.gameFinished = false;
     }
 }
 

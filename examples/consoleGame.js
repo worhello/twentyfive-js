@@ -111,6 +111,7 @@ function handlePlayerRobbing(game) {
     }
     else {
         tf.GameStateMachine.handleAiPlayerRob(game);
+        updateGameState(game);
     }
 }
 
