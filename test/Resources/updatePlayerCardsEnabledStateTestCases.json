@@ -88,6 +88,36 @@
                 { "suit": "diamonds", "value": "three" }
              ],
             "expectedEnabledStates": [ false, false, true, true, true ]
+        },
+        {
+            "name": "two of hearts played - is not trumps - ace of hearts can NOT be reneged",
+            "playerHand": [
+                { "suit": "hearts", "value": "ace" },
+                { "suit": "spades", "value": "queen" },
+                { "suit": "spades", "value": "nine" },
+                { "suit": "spades", "value": "eight" },
+                { "suit": "spades", "value": "seven" }
+            ],
+            "trumpCard": { "suit": "diamonds", "value": "three" },
+            "playedCards": [ 
+                { "suit": "hearts", "value": "two" }
+             ],
+            "expectedEnabledStates": [ true, false, false, false, false ]
+        },
+        {
+            "name": "two of hearts played - is trumps - ace of hearts can NOT be reneged",
+            "playerHand": [
+                { "suit": "hearts", "value": "ace" },
+                { "suit": "spades", "value": "queen" },
+                { "suit": "diamonds", "value": "nine" },
+                { "suit": "spades", "value": "eight" },
+                { "suit": "diamonds", "value": "seven" }
+            ],
+            "trumpCard": { "suit": "hearts", "value": "three" },
+            "playedCards": [ 
+                { "suit": "hearts", "value": "two" }
+             ],
+            "expectedEnabledStates": [ true, false, false, false, false ]
         }
     ]
 }
