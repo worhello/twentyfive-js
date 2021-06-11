@@ -115,6 +115,8 @@ class GameStateMachine {
         game.trumpCard = new (GameStateMachineModuleHelper.getTrumpCardModule()).TrumpCard();
         game.trumpCard.card = game.deck.cards.shift();
 
+        game.currentHandInfo.needMoreCardsDealt = false;
+
         return gameModule.GameState2.cardsDealt;
     }
 
@@ -273,6 +275,9 @@ class GameStateMachine {
 
         game.endOfHandInfo.orderedPlayers.length = 0;
         game.endOfHandInfo.orderedPlayers = GameStateMachine.getSortedListOfPlayers(game);
+
+        game.currentHandInfo.needMoreCardsDealt = GameStateMachine.mustDealNewCards(game);
+        game.endOfHandInfo.gameFinished = (game.endOfHandInfo.orderedPlayers[0].score >= 25);
     }
 
     static getSortedListOfPlayers(game) {
@@ -291,13 +296,7 @@ class GameStateMachine {
     }
 
     static handleRoundFinished(gameModule, game) {
-        var winnerWithHighestScore = game.players[0];
-        game.players.map(function(p) {
-            if (p.score > winnerWithHighestScore.score) {
-                winnerWithHighestScore = p;
-            }
-        });
-        if (winnerWithHighestScore.score >= 25) {
+        if (game.endOfHandInfo.gameFinished) {
             return gameModule.GameState2.gameFinished;
         }
 
