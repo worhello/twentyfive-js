@@ -10,6 +10,15 @@ class GameStateMachineModuleHelper {
         }
     }
 
+    static getDeckModule() {
+        if (typeof module !== 'undefined' && module.exports != null) {
+            return require("./deck");
+        }
+        else {
+            return window.deck;
+        }
+    }
+
     static getGameLogicModule() {
         if (typeof module !== 'undefined' && module.exports != null) {
             return require("./gameLogic");
@@ -116,6 +125,11 @@ class GameStateMachine {
 
     static handleDealCards(gameModule, game) {
         let numCardsPerPlayer = 5;
+        let numCardsNeeded = (game.players.length * numCardsPerPlayer) + 1;
+        if (game.deck.cards.length < numCardsNeeded) {
+            game.deck = new (GameStateMachineModuleHelper.getDeckModule()).Deck();
+        }
+
         for (let p of game.players) {
             for (var i = 0; i < numCardsPerPlayer; i++) {
                 p.cards.push(game.deck.cards.shift());

@@ -62,6 +62,37 @@ function setGameToCardsDealt(game, onePlayerCanRob) {
     }
 }
 
+describe("GameStateMachineTests.resetDeckIfNeeded", function() {
+    let gameId = "gameId";
+    let numPlayers = 9;
+    let renegingDisabled = false;
+    var game = new tf.Game(gameId, numPlayers, renegingDisabled);
+    setGameToDealCards(game);
+
+    describe ("handle 9 players", function() {
+        tf.GameStateMachine.updateToNextGameState(game);
+        assert.strictEqual(game.currentState2, tf.GameState2.cardsDealt);
+        for (let p of game.players) {
+            assert.strictEqual(p.cards.length, 5);
+            for (let c of p.cards) {
+                assert.notStrictEqual(c, undefined);
+            }
+        }
+
+        it("second dealing - tests only", function() {
+            game.currentState2 = tf.GameState2.dealCards;
+            tf.GameStateMachine.updateToNextGameState(game);
+            assert.strictEqual(game.currentState2, tf.GameState2.cardsDealt);
+            for (let p of game.players) {
+                assert.strictEqual(p.cards.length, 10);
+                for (let c of p.cards) {
+                    assert.notStrictEqual(c, undefined);
+                }
+            }
+        })
+    });
+});
+
 describe("GameStateMachineTests.calculateGameState", function() {
     var aiWillRobCardStub = sinon.stub(tf.PlayerLogic, 'aiWillRobCard');
     aiWillRobCardStub.callsFake(function() { return false; });
