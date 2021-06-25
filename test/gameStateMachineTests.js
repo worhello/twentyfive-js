@@ -126,6 +126,22 @@ describe("GameStateMachineTests.calculateGameState", function() {
             tf.GameStateMachine.addPlayer(game, realPlayer1);
             tf.GameStateMachine.fillWithAIs(game);
         });
+
+        it ("add, remove, add player", function () {
+            tf.GameStateMachine.addPlayer(game, realPlayer1);
+            tf.GameStateMachine.updateToNextGameState(game);
+            assert.strictEqual(game.currentState2, tf.GameState2.waitingForPlayers);
+
+            tf.GameStateMachine.addPlayer(game, realPlayer2);
+            tf.GameStateMachine.updateToNextGameState(game);
+            assert.strictEqual(game.currentState2, tf.GameState2.readyToPlay);
+
+            tf.GameStateMachine.removePlayer(game, realPlayer2.id);
+            tf.GameStateMachine.updateToNextGameState(game);
+            assert.strictEqual(game.currentState2, tf.GameState2.waitingForPlayers);
+
+            tf.GameStateMachine.addPlayer(game, realPlayer2);
+        });
     });
 
     describe("transition to dealCards", () => {
@@ -214,6 +230,59 @@ describe("GameStateMachineTests.calculateGameState", function() {
                 assert.strictEqual(game.roundRobbingInfo.robbingFinished, true);
                 assert.strictEqual(game.trumpCard.hasBeenStolen, false);
             });
+        });
+    });
+
+    describe("handle waitingForPlayersToMarkAsReady", function() {
+        beforeEach(() => {
+            setGameToWaitingForPlayers(game);
+        });
+
+        let realPlayer1 = new tf.Player("player1", false);
+        let realPlayer2 = new tf.Player("player2", false);
+
+        it ("all real players", function() {
+            tf.GameStateMachine.addPlayer(game, realPlayer1);
+            tf.GameStateMachine.addPlayer(game, realPlayer2);
+
+            tf.GameStateMachine.markAllPlayersAsNotReady(game);
+            game.currentState2 = tf.GameState2.waitingForPlayersToMarkAsReady;
+
+            tf.GameStateMachine.updateToNextGameState(game);
+            assert.strictEqual(game.currentState2, tf.GameState2.waitingForPlayersToMarkAsReady);
+
+            tf.GameStateMachine.markPlayerReadyForNextRound(game, realPlayer1.id);
+            tf.GameStateMachine.updateToNextGameState(game);
+            assert.strictEqual(game.currentState2, tf.GameState2.waitingForPlayersToMarkAsReady);
+
+            tf.GameStateMachine.markPlayerReadyForNextRound(game, realPlayer2.id);
+            tf.GameStateMachine.updateToNextGameState(game);
+            assert.strictEqual(game.currentState2, tf.GameState2.dealCards);
+        });
+
+        it ("all AI players", function() {
+            tf.GameStateMachine.fillWithAIs(game);
+
+            tf.GameStateMachine.markAllPlayersAsNotReady(game);
+            game.currentState2 = tf.GameState2.waitingForPlayersToMarkAsReady;
+
+            tf.GameStateMachine.updateToNextGameState(game);
+            assert.strictEqual(game.currentState2, tf.GameState2.dealCards);
+        });
+
+        it ("mix of AI and real players", function() {
+            tf.GameStateMachine.addPlayer(game, realPlayer1);
+            tf.GameStateMachine.fillWithAIs(game);
+
+            tf.GameStateMachine.markAllPlayersAsNotReady(game);
+            game.currentState2 = tf.GameState2.waitingForPlayersToMarkAsReady;
+
+            tf.GameStateMachine.updateToNextGameState(game);
+            assert.strictEqual(game.currentState2, tf.GameState2.waitingForPlayersToMarkAsReady);
+
+            tf.GameStateMachine.markPlayerReadyForNextRound(game, realPlayer1.id);
+            tf.GameStateMachine.updateToNextGameState(game);
+            assert.strictEqual(game.currentState2, tf.GameState2.dealCards);
         });
     });
 
@@ -323,6 +392,9 @@ describe("GameStateMachineTests.calculateGameState", function() {
             assert.strictEqual(game.currentHandInfo.needMoreCardsDealt, true);
 
             tf.GameStateMachine.updateToNextGameState(game);
+            assert.strictEqual(game.currentState2, tf.GameState2.waitingForPlayersToMarkAsReady);
+
+            tf.GameStateMachine.updateToNextGameState(game); // we have all AIs in this game
             assert.strictEqual(game.currentState2, tf.GameState2.dealCards);
 
             tf.GameStateMachine.updateToNextGameState(game);

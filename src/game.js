@@ -20,7 +20,8 @@ const GameState2 = Object.freeze({
     waitingForPlayerToRobTrumpCard: 5,
     waitingForPlayerMove: 6,
     roundFinished: 7,
-    gameFinished: 8
+    waitingForPlayersToMarkAsReady: 8,
+    gameFinished: 9
 });
 
 class GameHelper {

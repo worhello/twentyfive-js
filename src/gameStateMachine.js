@@ -56,7 +56,7 @@ class GameStateMachine {
             game.currentState2 = GameStateMachine.handleWaitingForPlayers(gameModule, game);
         }
         else if (game.currentState2 == gameModule.GameState2.readyToPlay) {
-            game.currentState2 = gameModule.GameState2.dealCards;
+            game.currentState2 = GameStateMachine.handleReadyToPlay(gameModule, game);
         }
         else if (game.currentState2 == gameModule.GameState2.dealCards) {
             game.currentState2 = GameStateMachine.handleDealCards(gameModule, game);
@@ -72,6 +72,9 @@ class GameStateMachine {
         }
         else if (game.currentState2 == gameModule.GameState2.roundFinished) {
             game.currentState2 = GameStateMachine.handleRoundFinished(gameModule, game);
+        }
+        else if (game.currentState2 == gameModule.GameState2.waitingForPlayersToMarkAsReady) {
+            game.currentState2 = GameStateMachine.handleWaitingForPlayersToMarkAsReady(gameModule, game);
         }
     }
 
@@ -89,6 +92,13 @@ class GameStateMachine {
             return gameModule.GameState2.readyToPlay;
         }
 
+        return gameModule.GameState2.waitingForPlayers;
+    }
+
+    static handleReadyToPlay(gameModule, game) {
+        if (game.players.length == game.numberOfPlayers) {
+            return gameModule.GameState2.dealCards;
+        }
         return gameModule.GameState2.waitingForPlayers;
     }
 
@@ -166,6 +176,13 @@ class GameStateMachine {
     // public
     static addPlayer(game, player) {
         game.players.push(player);
+    }
+
+    static removePlayer(game, playerId) {
+        let i = game.players.findIndex((p) => p.id == playerId);
+        if (i > -1) {
+            game.players.splice(i, 1);
+        }
     }
 
     // public
@@ -278,6 +295,10 @@ class GameStateMachine {
 
         game.currentHandInfo.needMoreCardsDealt = GameStateMachine.mustDealNewCards(game);
         game.endOfHandInfo.gameFinished = (game.endOfHandInfo.orderedPlayers[0].score >= 25);
+
+        if (game.currentHandInfo.needMoreCardsDealt) {
+            game.endOfHandInfo.nextRoundFirstPlayerId = game.endOfHandInfo.orderedPlayers[0].id;
+        }
     }
 
     static getSortedListOfPlayers(game) {
@@ -300,12 +321,6 @@ class GameStateMachine {
             return gameModule.GameState2.gameFinished;
         }
 
-        var nextGameState2 = gameModule.GameState2.waitingForPlayerMove;
-        if (GameStateMachine.mustDealNewCards(game)) {
-            game.endOfHandInfo.nextRoundFirstPlayerId = game.endOfHandInfo.orderedPlayers[0].id;
-            nextGameState2 = gameModule.GameState2.dealCards;
-        }
-
         // reset game state
         GameStateMachine.rotatePlayers(game);
         GameStateMachine.rotateDealer(game);
@@ -313,7 +328,13 @@ class GameStateMachine {
         game.currentHandInfo.currentPlayerIndex = 0;
         game.currentHandInfo.currentWinningPlayerAndCard = {};
         game.currentHandInfo.roundFinished = false;
-        return nextGameState2;
+
+        if (game.currentHandInfo.needMoreCardsDealt) {
+            GameStateMachine.markAllPlayersAsNotReady(game);
+            return gameModule.GameState2.waitingForPlayersToMarkAsReady;
+        }
+
+        return gameModule.GameState2.waitingForPlayerMove;
     }
 
     static rotatePlayers(game) {
@@ -333,6 +354,27 @@ class GameStateMachine {
             }
         }
         return needMoreCards;
+    }
+
+    static markAllPlayersAsNotReady(game) {
+        for (var p of game.players) {
+            p.isReadyForNextRound = p.isAi; // only non-AI players have to mark themselves ready
+        }
+    }
+
+    static markPlayerReadyForNextRound(game, playerId) {
+        let player = game.players.find((p) => p.id == playerId);
+        if (player) {
+            player.isReadyForNextRound = true;
+        }
+    }
+
+    static handleWaitingForPlayersToMarkAsReady(gameModule, game) {
+        let allPlayersReady = game.players.every((p) => p.isReadyForNextRound == true);
+        if (allPlayersReady) {
+            return gameModule.GameState2.dealCards;
+        }
+        return gameModule.GameState2.waitingForPlayersToMarkAsReady;
     }
 }
 

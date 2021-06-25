@@ -91,6 +91,9 @@ function updateGameState(game) {
     else if (game.currentState2 == tf.GameState2.waitingForPlayerMove) {
         handleWaitingForPlayerMove(game);
     }
+    else if (game.currentState2 == tf.GameState2.waitingForPlayersToMarkAsReady) {
+        handleWaitingForPlayersToMarkAsReady(game);
+    }
     else if (game.currentState2 == tf.GameState2.roundFinished) {
         handleRoundFinished(game);
     }
@@ -196,6 +199,12 @@ function handleSelfPlayerPlayCard(game, player) {
 
 function handleAiPlayCard(game, player) {
     tf.GameStateMachine.aiPlayCard(game, player);
+    updateGameState(game);
+}
+
+function handleWaitingForPlayersToMarkAsReady(game) {
+    print("New cards will be dealt!");
+    tf.GameStateMachine.markPlayerReadyForNextRound(game, selfPlayer.id);
     updateGameState(game);
 }
 
