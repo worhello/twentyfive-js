@@ -1,16 +1,5 @@
 "use strict";
 
-const GameState = Object.freeze({
-    notStarted: 0,
-    waitingForPlayers: 1,
-    readyToPlay: 2,
-    inProgress: 3,
-    waitingToDealNewCards: 4,
-    waitingForPlayerToRobTrumpCard: 5,
-    gameFinished: 6
-});
-
-// replacement for GameState, not wired up yet
 const GameState2 = Object.freeze({
     notStarted: 0,
     waitingForPlayers: 1,
@@ -79,29 +68,17 @@ class Game {
         this.deck = new (GameHelper.getDeckModule()).Deck();
         this.trumpCard = new (GameHelper.getTrumpCardModule()).TrumpCard();
 
-        this.currentState = GameState.notStarted; // deprecated
         this.currentState2 = GameState2.notStarted;
 
         this.roundRobbingInfo = new RoundRobbingInfo();
-        this.playerCanRobIndex = -1; // deprecated
-        this.robbingFinished = false; // deprecated
-
         this.currentHandInfo = new HandInfo();
-        this.roundPlayerAndCards = []; // deprecated
-        this.currentPlayerIndex = 0; // deprecated
-        this.currentWinningPlayerAndCard = {}; // deprecated
-        this.roundFinished = false; // deprecated
-
         this.endOfHandInfo = new EndOfHandInfo();
-        this.nextRoundFirstPlayerId = ""; // deprecated
-        this.orderedPlayers = []; // deprecated
     }
 }
 
 (function () {
     let e = {};
     e.Game = Game;
-    e.GameState = GameState;
     e.GameState2 = GameState2;
     
     if (typeof module !== 'undefined' && module.exports != null) {

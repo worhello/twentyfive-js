@@ -15,9 +15,8 @@ describe('Game Tests', function() {
         assert.strictEqual(game.numberOfPlayers, numberOfPlayers);
         assert.strictEqual(game.players.length, 0);
         assert.strictEqual(game.renegingDisabled, renegingDisabled);
-        assert.strictEqual(game.roundPlayerAndCards.length, 0);
-        assert.strictEqual(game.currentPlayerIndex, 0);
-        assert.strictEqual(Object.keys(game.currentWinningPlayerAndCard).length, 0);
-        assert.strictEqual(game.currentState, tf.GameState.notStarted);
+        assert.strictEqual(game.currentHandInfo.roundPlayerAndCards.length, 0);
+        assert.strictEqual(game.currentHandInfo.currentPlayerIndex, 0);
+        assert.strictEqual(game.currentState2, tf.GameState2.notStarted);
     });
 });
