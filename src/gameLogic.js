@@ -150,23 +150,25 @@ function getBestCardFromOptions(cardOptions, trumpCard, playedCards) {
         return cardOptions[0];
     }
 
+    let cardOptionsCanPlay = cardOptions.filter(c => c.canPlay == true);
+
     if (playedCards.length == 0) {
-        return cardOptions[0];
+        return cardOptionsCanPlay[0];
     }
 
     let firstCardSuit = playedCards[0].suit;
-    let optionWithFirstCardSuit = cardOptions.find(c => c.suit == firstCardSuit);
+    let optionWithFirstCardSuit = cardOptionsCanPlay.find(c => c.suit == firstCardSuit);
     if (optionWithFirstCardSuit) {
         return optionWithFirstCardSuit;
     }
     
     let trumpCardSuit = trumpCard.card.suit;
-    let optionWithTrumpCardSuit = cardOptions.find(c => c.suit == trumpCardSuit);
+    let optionWithTrumpCardSuit = cardOptionsCanPlay.find(c => c.suit == trumpCardSuit);
     if (optionWithTrumpCardSuit) {
         return optionWithTrumpCardSuit;
     }
 
-    return cardOptions[0];
+    return cardOptionsCanPlay[0];
 }
 
 function getWinningCard(trumpCard, playedCards) {

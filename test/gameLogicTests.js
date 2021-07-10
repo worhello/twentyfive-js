@@ -55,7 +55,11 @@ function buildValueFromString(valueAsString) {
 }
 
 function buildDeckCardFromJSON(cardAsJson) {
-    return new tf.Card(buildSuitFromString(cardAsJson.suit), buildValueFromString(cardAsJson.value));
+    var card = new tf.Card(buildSuitFromString(cardAsJson.suit), buildValueFromString(cardAsJson.value));
+    if (cardAsJson.canPlay !== undefined) {
+        card.canPlay = cardAsJson.canPlay;
+    }
+    return card;
 }
 
 function buildDeckCardsFromJSON(cardsAsJsonArray) {
