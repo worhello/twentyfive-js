@@ -96,6 +96,8 @@ describe("GameStateMachineTests.resetDeckIfNeeded", function() {
 describe("GameStateMachineTests.calculateGameState", function() {
     var aiWillRobCardStub = sinon.stub(tf.PlayerLogic, 'aiWillRobCard');
     aiWillRobCardStub.callsFake(function() { return false; });
+    var shuffleStub = sinon.stub(tf.Helpers, 'shuffle');
+    shuffleStub.callsFake(function(things) {}); //no-op
 
     let gameId = "gameId";
     let numPlayers = 2;
