@@ -76,6 +76,10 @@ function isTrumpCard(cardA, trumpCard) {
     return isTrumpSuit(cardA, trumpCard) || isAceOfHearts(cardA);
 }
 
+function isSpecialTrumpCard(cardA, trumpCard) {
+    return isFiveOfTrumps(cardA, trumpCard) || isJackOfTrumps(cardA, trumpCard) || isAceOfHearts(cardA);
+}
+
 function compareNormalCards(cardA, cardB) {
     var orderedCards = [];
     if (isRedCard(cardA)) {
@@ -206,27 +210,55 @@ function canTrumpCardBeRobbed(playerHand, playerIsDealer, trumpCard) {
     return false;
 }
 
+function onlyPlayableCardsAreSpecialTrumpCardsOrNormal(cards, trumpCard, initialSuit) {
+    return cards.find(c => isTrumpCard(c, trumpCard) ? !isSpecialTrumpCard(c, trumpCard) : c.suit == initialSuit) === undefined;
+}
+
+function cardsContainFiveOfTrumps(cards, trumpCard) {
+    return cards.find(c => isFiveOfTrumps(c, trumpCard)) !== undefined;
+}
+
+function cardsContainJackOfTrumps(cards, trumpCard) {
+    return cards.find(c => isJackOfTrumps(c, trumpCard)) !== undefined;
+}
+
+function cardsContainAceOfHearts(cards) {
+    return cards.find(c => isAceOfHearts(c)) !== undefined;
+}
+
+function cardsContainSpecialTrumpCards(cards, trumpCard) {
+    return cardsContainFiveOfTrumps(cards, trumpCard) || cardsContainJackOfTrumps(cards, trumpCard) || cardsContainAceOfHearts(cards);
+}
+
+function markAllCardsCanPlay(cards) {
+    for (var card of cards) {
+        card.canPlay = true;
+    }
+}
+
 function updatePlayerCardsEnabledState(playedCards, cards, trumpCard) {
     if (playedCards.length === 0) {
-        for (var card of cards) {
-            card.canPlay = true;
-        }
+        markAllCardsCanPlay(cards);
         return;
     }
 
-    let firstCard = playedCards[0];
+    let playerHasSpecialTrumpCards = cardsContainSpecialTrumpCards(cards, trumpCard);
+    let specialTrumpCardsPlayed = cardsContainSpecialTrumpCards(playedCards, trumpCard);
+    if (playerHasSpecialTrumpCards && !specialTrumpCardsPlayed && onlyPlayableCardsAreSpecialTrumpCardsOrNormal(cards, trumpCard, playedCards[0].suit)) {
+        markAllCardsCanPlay(cards);
+        return;
+    }
+
     var canPlayAtLeastOneCard = false;
     for (var card of cards) {
-        card.canPlay = (card.suit === firstCard.suit || card.suit === trumpCard.card.suit);
+        card.canPlay = (card.suit === playedCards[0].suit || isTrumpCard(card, trumpCard));
         if (card.canPlay === true) {
             canPlayAtLeastOneCard = true;
         }
     }
 
     if (canPlayAtLeastOneCard === false) {
-        for (var card of cards) {
-            card.canPlay = true;
-        }
+        markAllCardsCanPlay(cards);
     }
 }
 

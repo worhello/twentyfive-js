@@ -90,7 +90,7 @@
             "expectedEnabledStates": [ false, false, true, true, true ]
         },
         {
-            "name": "two of hearts played - is not trumps - ace of hearts can NOT be reneged",
+            "name": "two of hearts played - is not trumps - ace of hearts CAN be reneged",
             "playerHand": [
                 { "suit": "hearts", "value": "ace" },
                 { "suit": "spades", "value": "queen" },
@@ -102,10 +102,10 @@
             "playedCards": [ 
                 { "suit": "hearts", "value": "two" }
              ],
-            "expectedEnabledStates": [ true, false, false, false, false ]
+            "expectedEnabledStates": [ true, true, true, true, true ]
         },
         {
-            "name": "two of hearts played - is trumps - ace of hearts can NOT be reneged",
+            "name": "two of hearts played - is trumps - ace of hearts CAN be reneged",
             "playerHand": [
                 { "suit": "hearts", "value": "ace" },
                 { "suit": "spades", "value": "queen" },
@@ -117,7 +117,112 @@
             "playedCards": [ 
                 { "suit": "hearts", "value": "two" }
              ],
-            "expectedEnabledStates": [ true, false, false, false, false ]
+             "expectedEnabledStates": [ true, true, true, true, true ]
+        },
+        {
+            "name": "two of hearts played - is trumps - five of hearts CAN be reneged",
+            "playerHand": [
+                { "suit": "hearts", "value": "five" },
+                { "suit": "spades", "value": "queen" },
+                { "suit": "diamonds", "value": "nine" },
+                { "suit": "spades", "value": "eight" },
+                { "suit": "diamonds", "value": "seven" }
+            ],
+            "trumpCard": { "suit": "hearts", "value": "three" },
+            "playedCards": [ 
+                { "suit": "hearts", "value": "two" }
+             ],
+             "expectedEnabledStates": [ true, true, true, true, true ]
+        },
+        {
+            "name": "two of hearts played - is trumps - jack of hearts CAN be reneged",
+            "playerHand": [
+                { "suit": "hearts", "value": "jack" },
+                { "suit": "spades", "value": "queen" },
+                { "suit": "diamonds", "value": "nine" },
+                { "suit": "spades", "value": "eight" },
+                { "suit": "diamonds", "value": "seven" }
+            ],
+            "trumpCard": { "suit": "hearts", "value": "three" },
+            "playedCards": [ 
+                { "suit": "hearts", "value": "two" }
+             ],
+             "expectedEnabledStates": [ true, true, true, true, true ]
+        },
+        {
+            "name": "two of diamonds played - is trumps - ace of diamonds can NOT be reneged",
+            "playerHand": [
+                { "suit": "diamonds", "value": "ace" },
+                { "suit": "spades", "value": "queen" },
+                { "suit": "hearts", "value": "nine" },
+                { "suit": "spades", "value": "eight" },
+                { "suit": "hearts", "value": "seven" }
+            ],
+            "trumpCard": { "suit": "diamonds", "value": "three" },
+            "playedCards": [ 
+                { "suit": "diamonds", "value": "two" }
+             ],
+             "expectedEnabledStates": [ true, false, false, false, false ]
+        },
+        {
+            "name": "ace of hearts played - diamonds is trumps - jack and five of diamonds CAN be reneged",
+            "playerHand": [
+                { "suit": "diamonds", "value": "jack" },
+                { "suit": "diamonds", "value": "five" },
+                { "suit": "hearts", "value": "nine" },
+                { "suit": "spades", "value": "eight" },
+                { "suit": "hearts", "value": "seven" }
+            ],
+            "trumpCard": { "suit": "diamonds", "value": "three" },
+            "playedCards": [ 
+                { "suit": "hearts", "value": "ace" }
+             ],
+             "expectedEnabledStates": [ true, true, true, false, true ]
+        },
+        {
+            "name": "jack of diamonds played - is trumps - five of diamonds CAN be reneged, ace of hearts can NOT be reneged",
+            "playerHand": [
+                { "suit": "hearts", "value": "ace" },
+                { "suit": "diamonds", "value": "five" },
+                { "suit": "spades", "value": "nine" },
+                { "suit": "spades", "value": "eight" },
+                { "suit": "spades", "value": "seven" }
+            ],
+            "trumpCard": { "suit": "diamonds", "value": "three" },
+            "playedCards": [ 
+                { "suit": "diamonds", "value": "jack" }
+             ],
+             "expectedEnabledStates": [ true, true, false, false, false ]
+        },
+        {
+            "name": "jack of diamonds played - is trumps - five of diamonds CAN be reneged, eight of diamonds can NOT be reneged",
+            "playerHand": [
+                { "suit": "diamonds", "value": "eight" },
+                { "suit": "diamonds", "value": "five" },
+                { "suit": "spades", "value": "nine" },
+                { "suit": "spades", "value": "eight" },
+                { "suit": "spades", "value": "seven" }
+            ],
+            "trumpCard": { "suit": "diamonds", "value": "three" },
+            "playedCards": [ 
+                { "suit": "diamonds", "value": "jack" }
+             ],
+             "expectedEnabledStates": [ true, true, false, false, false ]
+        },
+        {
+            "name": "five of diamonds played - is trumps - ace of hearts and jack of diamonds can NOT be reneged",
+            "playerHand": [
+                { "suit": "hearts", "value": "ace" },
+                { "suit": "diamonds", "value": "jack" },
+                { "suit": "spades", "value": "nine" },
+                { "suit": "spades", "value": "eight" },
+                { "suit": "spades", "value": "seven" }
+            ],
+            "trumpCard": { "suit": "diamonds", "value": "three" },
+            "playedCards": [ 
+                { "suit": "diamonds", "value": "five" }
+             ],
+             "expectedEnabledStates": [ true, true, false, false, false ]
         }
     ]
 }
