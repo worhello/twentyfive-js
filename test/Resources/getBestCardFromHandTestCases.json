@@ -57,6 +57,18 @@
             ],
             "trumpCard": { "suit": "diamonds", "value": "two"},
             "expectedCardIndex": 2
+        },
+        {
+            "name": "some cards cannot be played - play best available enabled card",
+            "playedCards": [
+                { "suit": "diamonds", "value": "six" }
+            ],
+            "cardOptions": [
+                { "suit": "hearts", "value": "ace", "canPlay": true },
+                { "suit": "diamonds", "value": "nine", "canPlay": false }
+            ],
+            "trumpCard": { "suit": "diamonds", "value": "two"},
+            "expectedCardIndex": 0
         }
     ]
 }
