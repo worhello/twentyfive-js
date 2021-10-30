@@ -56,6 +56,7 @@ class Player {
         this.isDealer = false;
         this.isAi = false;
         this.isReadyForNextRound = false;
+        this.isHost = false;
     }
 }
 
