@@ -4,7 +4,7 @@
   "license": "MIT",
   "dependencies": {
     "assert": "latest",
-    "mocha": "^8.4.0",
+    "mocha": "latest",
     "sinon": "latest"
   },
   "scripts": {
