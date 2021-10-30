@@ -138,6 +138,8 @@ describe("GameStateMachineTests.calculateGameState", function() {
 
         afterEach(() => {
             assert.strictEqual(game.players.length, numPlayers);
+            assert.strictEqual(game.players[0].isHost, true);
+            assert.strictEqual(game.players[1].isHost, false);
             tf.GameStateMachine.updateToNextGameState(game);
             assert.strictEqual(game.currentState2, tf.GameState2.readyToPlay);
             assert.strictEqual(checkOneDealerSet(game), true);
