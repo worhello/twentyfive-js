@@ -190,6 +190,9 @@ class GameStateMachine {
     // public
     static addPlayer(game, player) {
         game.players.push(player);
+        if (game.players.length == 1) {
+            game.players[0].isHost = true;
+        }
     }
 
     static removePlayer(game, playerId) {
