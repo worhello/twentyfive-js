@@ -47,16 +47,11 @@ function buildCardName(s, v) {
     return convertValueName(v) + "_of_" + convertSuitName(s);
 }
 
-function buildCardUrl(cardName) {
-    return "resources/images/Cards/" + cardName + ".svg";
-}
-
 class Card {
     constructor(suit, value) {
         this.suit = suit;
         this.value = value;
         this.cardName = buildCardName(suit, value);
-        this.url = buildCardUrl(this.cardName);
         this.canPlay = true;
     }
 }
