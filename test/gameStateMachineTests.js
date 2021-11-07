@@ -65,8 +65,7 @@ function setGameToCardsDealt(game, onePlayerCanRob) {
 describe("GameStateMachineTests.resetDeckIfNeeded", function() {
     let gameId = "gameId";
     let numPlayers = 9;
-    let renegingDisabled = false;
-    var game = new tf.Game(gameId, numPlayers, renegingDisabled);
+    var game = new tf.Game(gameId, numPlayers);
     setGameToDealCards(game);
 
     describe ("handle 9 players", function() {
@@ -101,11 +100,10 @@ describe("GameStateMachineTests.calculateGameState", function() {
 
     let gameId = "gameId";
     let numPlayers = 2;
-    let renegingDisabled = false;
-    var game = new tf.Game(gameId, numPlayers, renegingDisabled);
+    var game = new tf.Game(gameId, numPlayers);
 
     beforeEach(() => {
-        game = new tf.Game(gameId, numPlayers, renegingDisabled);
+        game = new tf.Game(gameId, numPlayers);
         assert.strictEqual(game.currentState2, tf.GameState2.notStarted);
         assert.strictEqual(game.deck.cards.length, 52);
     });
@@ -113,7 +111,7 @@ describe("GameStateMachineTests.calculateGameState", function() {
     it ("initial state", () => {
         assert.strictEqual(game.id, gameId);
         assert.strictEqual(game.numberOfPlayers, numPlayers);
-        assert.strictEqual(game.renegingDisabled, renegingDisabled);
+        assert.strictEqual(game.gameRules.renegingAllowed, true);
         assert.strictEqual(game.players.length, 0);
         assert.strictEqual(game.currentHandInfo.roundPlayerAndCards.length, 0);
         assert.strictEqual(game.currentHandInfo.currentPlayerIndex, 0);
@@ -121,7 +119,7 @@ describe("GameStateMachineTests.calculateGameState", function() {
     });
 
     it("notStarted state due to too many players requested", () => {
-        game = new tf.Game(gameId, 11, renegingDisabled);
+        game = new tf.Game(gameId, 11);
         tf.GameStateMachine.updateToNextGameState(game);
         assert.strictEqual(game.currentState2, tf.GameState2.notStarted);
     });

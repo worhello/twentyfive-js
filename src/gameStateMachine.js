@@ -106,6 +106,7 @@ class GameStateMachine {
 
     static handleReadyToPlay(gameModule, game) {
         if (game.players.length == game.numberOfPlayers) {
+            GameStateMachine.populateTeamsIfNeeded(gameModule, game);
             return gameModule.GameState2.dealCards;
         }
         return gameModule.GameState2.waitingForPlayers;
@@ -121,6 +122,10 @@ class GameStateMachine {
         
         dealerIndex = (dealerIndex + 1) % game.players.length;
         game.players[dealerIndex].isDealer = true;
+    }
+
+    static populateTeamsIfNeeded(gameModule, game) {
+        // TODO
     }
 
     static handleDealCards(gameModule, game) {
@@ -311,7 +316,7 @@ class GameStateMachine {
         game.endOfHandInfo.orderedPlayers = GameStateMachine.getSortedListOfPlayers(game);
 
         game.currentHandInfo.needMoreCardsDealt = GameStateMachine.mustDealNewCards(game);
-        game.endOfHandInfo.gameFinished = (game.endOfHandInfo.orderedPlayers[0].score >= 25);
+        game.endOfHandInfo.gameFinished = GameStateMachine.isGameFinished(game);
 
         if (game.currentHandInfo.needMoreCardsDealt) {
             game.endOfHandInfo.nextRoundFirstPlayerId = game.endOfHandInfo.orderedPlayers[0].id;
@@ -331,6 +336,12 @@ class GameStateMachine {
         }
         playersCopy.sort(cmpFunc);
         return playersCopy;
+    }
+
+    static isGameFinished(game) {
+        // TODO expand for teams
+        let winningScore = 25; // TODO move 25 to a constant in the game
+        return game.endOfHandInfo.orderedPlayers[0].score >= winningScore;
     }
 
     static handleRoundFinished(gameModule, game) {

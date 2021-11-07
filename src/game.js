@@ -33,6 +33,21 @@ class GameHelper {
     }
 }
 
+class GameRules {
+    constructor(winningScore, renegingAllowed) {
+        this.winningScore = winningScore;
+        this.renegingAllowed = renegingAllowed;
+    }
+
+    static parseGameRulesObject(gameRulesCandidate) {
+        //
+    }
+
+    static buildDefaultRules() {
+        return new GameRules(25, true);
+    }
+}
+
 class RoundRobbingInfo {
     constructor() {
         this.playerCanRobIndex = -1;
@@ -59,10 +74,11 @@ class EndOfHandInfo {
 }
 
 class Game {
-    constructor(id, numberOfPlayers, disableReneging) {
+    constructor(id, numberOfPlayers, gameRulesCandidate) {
         this.id = id;
         this.numberOfPlayers = numberOfPlayers;
-        this.renegingDisabled = disableReneging;
+
+        this.gameRules = gameRulesCandidate === undefined ? GameRules.buildDefaultRules() : GameRules.parseGameRulesObject(gameRulesCandidate);
 
         this.players = [];
         this.deck = new (GameHelper.getDeckModule()).Deck();
