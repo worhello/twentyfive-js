@@ -19,3 +19,43 @@ describe('Game Tests', function() {
         assert.strictEqual(game.currentState2, tf.GameState2.notStarted);
     });
 });
+
+describe('GameRules tests', function() {
+    let id = "myId";
+    let numberOfPlayers = 2;
+    it('default config', function() {
+        let game = new tf.Game(id, numberOfPlayers);
+        assert.strictEqual(game.gameRules.winningScore, 25);
+        assert.strictEqual(game.gameRules.renegingAllowed, true);
+    });
+
+    it('invalid config - empty config', function() {
+        assert.throws(() => {
+            let game = new tf.Game(id, numberOfPlayers, {});
+        });
+    });
+
+    it('invalid config - missing values config', function() {
+        assert.throws(() => {
+            let game = new tf.Game(id, numberOfPlayers, { "winningScore": 25 });
+        });
+    });
+
+    it('invalid config - invalid key config', function() {
+        assert.throws(() => {
+            let game = new tf.Game(id, numberOfPlayers, { "winningScore": 25, "foo": "bar" });
+        });
+    });
+
+    it('invalid config - too many values config', function() {
+        assert.throws(() => {
+            let game = new tf.Game(id, numberOfPlayers, { "winningScore": 25, "renegingAllowed": true, "foo": "bar" });
+        });
+    });
+
+    it('valid config - too many values config', function() {
+        let game = new tf.Game(id, numberOfPlayers, { "winningScore": 45, "renegingAllowed": false });
+        assert.strictEqual(game.gameRules.winningScore, 45);
+        assert.strictEqual(game.gameRules.renegingAllowed, false);
+    });
+});

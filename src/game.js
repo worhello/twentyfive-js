@@ -39,8 +39,26 @@ class GameRules {
         this.renegingAllowed = renegingAllowed;
     }
 
+    static allowedKeys = [
+        "winningScore",
+        "renegingAllowed"
+    ];
+
     static parseGameRulesObject(gameRulesCandidate) {
-        //
+        if (gameRulesCandidate === undefined) {
+            return GameRules.buildDefaultRules();
+        }
+
+        if (Object.keys(gameRulesCandidate).sort().join(',') !== GameRules.allowedKeys.sort().join(',')) {
+            throw "Too many or missing keys in game rules candidate";
+        }
+
+        var rules = GameRules.buildDefaultRules();
+        for (let key of GameRules.allowedKeys) {
+            rules[key] = gameRulesCandidate[key];
+        }
+
+        return rules;
     }
 
     static buildDefaultRules() {
@@ -78,7 +96,7 @@ class Game {
         this.id = id;
         this.numberOfPlayers = numberOfPlayers;
 
-        this.gameRules = gameRulesCandidate === undefined ? GameRules.buildDefaultRules() : GameRules.parseGameRulesObject(gameRulesCandidate);
+        this.gameRules = GameRules.parseGameRulesObject(gameRulesCandidate);
 
         this.players = [];
         this.deck = new (GameHelper.getDeckModule()).Deck();
