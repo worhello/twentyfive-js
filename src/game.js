@@ -33,6 +33,10 @@ class GameHelper {
     }
 }
 
+function allKeysPresent(object, keysToTest) {
+    return Object.keys(object).sort().join(',') === keysToTest.sort().join(',');
+}
+
 class GameRules {
     constructor(winningScore, renegingAllowed, useTeams) {
         this.winningScore = winningScore;
@@ -46,13 +50,30 @@ class GameRules {
         "useTeams"
     ];
 
+    static allowedTeamsKeys = [
+        "numTeams", "teamSize"
+    ];
+
     static parseGameRulesObject(gameRulesCandidate) {
         if (gameRulesCandidate === undefined) {
             return GameRules.buildDefaultRules();
         }
 
-        if (Object.keys(gameRulesCandidate).sort().join(',') !== GameRules.allowedKeys.sort().join(',')) {
+        if (!allKeysPresent(gameRulesCandidate, GameRules.allowedKeys)) {
             throw "Too many or missing keys in game rules candidate";
+        }
+
+        if (gameRulesCandidate.useTeams !== null) {
+            if (!allKeysPresent(gameRulesCandidate.useTeams, GameRules.allowedTeamsKeys) || typeof gameRulesCandidate.useTeams.numTeams !== 'number' || typeof gameRulesCandidate.useTeams.teamSize !== 'number') {
+                throw "Invalid teams config";
+            }
+            let totalPlayersRequired = gameRulesCandidate.useTeams.numTeams * gameRulesCandidate.useTeams.teamSize;
+            if (totalPlayersRequired < 4) {
+                throw "Too few players";
+            }
+            else if (totalPlayersRequired > 10) {
+                throw "Too many players needed";
+            }
         }
 
         var rules = GameRules.buildDefaultRules();
@@ -64,7 +85,7 @@ class GameRules {
     }
 
     static buildDefaultRules() {
-        return new GameRules(25, true, false);
+        return new GameRules(25, true, null);
     }
 }
 

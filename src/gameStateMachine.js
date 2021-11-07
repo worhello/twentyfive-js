@@ -125,7 +125,7 @@ class GameStateMachine {
     }
 
     static populateTeamsIfNeeded(game) {
-        if (game.gameRules.useTeams == false) {
+        if (game.gameRules.useTeams === null) {
             return;
         }
         // TODO - implement populating teams into game
@@ -342,7 +342,7 @@ class GameStateMachine {
     }
 
     static isGameFinished(game) {
-        if (game.gameRules.useTeams == false) {
+        if (game.gameRules.useTeams === null) {
             return game.endOfHandInfo.orderedPlayers[0].score >= game.gameRules.winningScore;
         }
 

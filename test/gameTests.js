@@ -53,9 +53,72 @@ describe('GameRules tests', function() {
         });
     });
 
-    it('valid config - too many values config', function() {
-        let game = new tf.Game(id, numberOfPlayers, { "winningScore": 45, "renegingAllowed": false, "useTeams": false });
+    it('invalid config - invalid teams config', function() {
+        assert.throws(() => {
+            let game = new tf.Game(id, numberOfPlayers, { "winningScore": 45, "renegingAllowed": false, "useTeams": { "numTeams": 2 } });
+        });
+    });
+
+    it('invalid config - wrong teams config', function() {
+        assert.throws(() => {
+            let game = new tf.Game(id, numberOfPlayers, { "winningScore": 45, "renegingAllowed": false, "useTeams": { "numTeams": 1, "foo": 2 } });
+        });
+    });
+
+    it('invalid config - way too few teams config', function() {
+        assert.throws(() => {
+            let game = new tf.Game(id, numberOfPlayers, { "winningScore": 45, "renegingAllowed": false, "useTeams": { "numTeams": 0, "teamSize": 2 } });
+        });
+    });
+
+    it('invalid config - too few teams config', function() {
+        assert.throws(() => {
+            let game = new tf.Game(id, numberOfPlayers, { "winningScore": 45, "renegingAllowed": false, "useTeams": { "numTeams": 1, "teamSize": 2 } });
+        });
+    });
+
+    it('invalid config - way too small teams config', function() {
+        assert.throws(() => {
+            let game = new tf.Game(id, numberOfPlayers, { "winningScore": 45, "renegingAllowed": false, "useTeams": { "numTeams": 2, "teamSize": 0 } });
+        });
+    });
+
+    it('invalid config - too small teams config', function() {
+        assert.throws(() => {
+            let game = new tf.Game(id, numberOfPlayers, { "winningScore": 45, "renegingAllowed": false, "useTeams": { "numTeams": 2, "teamSize": 1 } });
+        });
+    });
+
+    it('invalid config - too many teams config', function() {
+        assert.throws(() => {
+            let game = new tf.Game(id, numberOfPlayers, { "winningScore": 45, "renegingAllowed": false, "useTeams": { "numTeams": 6, "teamSize": 2 } });
+        });
+    });
+
+    it('invalid config - too big teams config', function() {
+        assert.throws(() => {
+            let game = new tf.Game(id, numberOfPlayers, { "winningScore": 45, "renegingAllowed": false, "useTeams": { "numTeams": 2, "teamSize": 6 } });
+        });
+    });
+
+    it('invalid config - invalid types teams config', function() {
+        assert.throws(() => {
+            let game = new tf.Game(id, numberOfPlayers, { "winningScore": 45, "renegingAllowed": false, "useTeams": { "numTeams": "2", "teamSize": "2" } });
+        });
+    });
+
+    it('valid config - no teams config', function() {
+        let game = new tf.Game(id, numberOfPlayers, { "winningScore": 45, "renegingAllowed": false, "useTeams": null });
         assert.strictEqual(game.gameRules.winningScore, 45);
         assert.strictEqual(game.gameRules.renegingAllowed, false);
+        assert.strictEqual(game.gameRules.useTeams, null);
+    });
+
+    it('valid config - small teams config', function() {
+        let game = new tf.Game(id, numberOfPlayers, { "winningScore": 45, "renegingAllowed": false, "useTeams": { "numTeams": 2, "teamSize": 2 } });
+        assert.strictEqual(game.gameRules.winningScore, 45);
+        assert.strictEqual(game.gameRules.renegingAllowed, false);
+        assert.strictEqual(game.gameRules.useTeams.numTeams, 2);
+        assert.strictEqual(game.gameRules.useTeams.teamSize, 2);
     });
 });
