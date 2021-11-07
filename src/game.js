@@ -95,6 +95,27 @@ class GameRules {
     }
 }
 
+class Team {
+    static teamId = 0;
+    constructor() {
+        this.id = "teamId_" + Team.teamId++;
+        this.playerIds = [];
+        this.totalScore = 0;
+    }
+}
+
+function generateTeams(gameRules) {
+    if (gameRules.useTeams === null) {
+        return [];
+    }
+
+    var teams = [];
+    for (var i = 0; i < gameRules.useTeams.numTeams; i++) {
+        teams.push(new Team());
+    }
+    return teams;
+}
+
 class RoundRobbingInfo {
     constructor() {
         this.playerCanRobIndex = -1;
@@ -116,6 +137,7 @@ class EndOfHandInfo {
     constructor() {
         this.nextRoundFirstPlayerId = "";
         this.orderedPlayers = [];
+        this.winningTeamId = "";
         this.gameFinished = false;
     }
 }
@@ -128,6 +150,7 @@ class Game {
         this.gameRules = GameRules.parseGameRulesObject(gameRulesCandidate, this.numberOfPlayers);
 
         this.players = [];
+        this.teams = generateTeams(this.gameRules);
         this.deck = new (GameHelper.getDeckModule()).Deck();
         this.trumpCard = new (GameHelper.getTrumpCardModule()).TrumpCard();
 

@@ -132,5 +132,6 @@ describe('GameRules tests', function() {
         assert.strictEqual(game.gameRules.renegingAllowed, false);
         assert.strictEqual(game.gameRules.useTeams.numTeams, 2);
         assert.strictEqual(game.gameRules.useTeams.teamSize, 2);
+        assert.strictEqual(game.teams.length, 2);
     });
 });
