@@ -54,7 +54,7 @@ class GameRules {
         "numTeams", "teamSize"
     ];
 
-    static parseGameRulesObject(gameRulesCandidate) {
+    static parseGameRulesObject(gameRulesCandidate, numberOfPlayers) {
         if (gameRulesCandidate === undefined) {
             return GameRules.buildDefaultRules();
         }
@@ -73,6 +73,12 @@ class GameRules {
             }
             else if (totalPlayersRequired > 10) {
                 throw "Too many players needed";
+            }
+            else if (totalPlayersRequired < numberOfPlayers) {
+                throw "Too few players specified in teams config";
+            }
+            else if (totalPlayersRequired > numberOfPlayers) {
+                throw "Not enough players specified for the game";
             }
         }
 
@@ -119,7 +125,7 @@ class Game {
         this.id = id;
         this.numberOfPlayers = numberOfPlayers;
 
-        this.gameRules = GameRules.parseGameRulesObject(gameRulesCandidate);
+        this.gameRules = GameRules.parseGameRulesObject(gameRulesCandidate, this.numberOfPlayers);
 
         this.players = [];
         this.deck = new (GameHelper.getDeckModule()).Deck();
