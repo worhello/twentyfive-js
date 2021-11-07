@@ -65,8 +65,7 @@ function setGameToCardsDealt(game, onePlayerCanRob) {
 describe("GameStateMachineTests.resetDeckIfNeeded", function() {
     let gameId = "gameId";
     let numPlayers = 9;
-    let renegingDisabled = false;
-    var game = new tf.Game(gameId, numPlayers, renegingDisabled);
+    var game = new tf.Game(gameId, numPlayers);
     setGameToDealCards(game);
 
     describe ("handle 9 players", function() {
@@ -101,11 +100,10 @@ describe("GameStateMachineTests.calculateGameState", function() {
 
     let gameId = "gameId";
     let numPlayers = 2;
-    let renegingDisabled = false;
-    var game = new tf.Game(gameId, numPlayers, renegingDisabled);
+    var game = new tf.Game(gameId, numPlayers);
 
     beforeEach(() => {
-        game = new tf.Game(gameId, numPlayers, renegingDisabled);
+        game = new tf.Game(gameId, numPlayers);
         assert.strictEqual(game.currentState2, tf.GameState2.notStarted);
         assert.strictEqual(game.deck.cards.length, 52);
     });
@@ -113,7 +111,7 @@ describe("GameStateMachineTests.calculateGameState", function() {
     it ("initial state", () => {
         assert.strictEqual(game.id, gameId);
         assert.strictEqual(game.numberOfPlayers, numPlayers);
-        assert.strictEqual(game.renegingDisabled, renegingDisabled);
+        assert.strictEqual(game.gameRules.renegingAllowed, true);
         assert.strictEqual(game.players.length, 0);
         assert.strictEqual(game.currentHandInfo.roundPlayerAndCards.length, 0);
         assert.strictEqual(game.currentHandInfo.currentPlayerIndex, 0);
@@ -121,7 +119,7 @@ describe("GameStateMachineTests.calculateGameState", function() {
     });
 
     it("notStarted state due to too many players requested", () => {
-        game = new tf.Game(gameId, 11, renegingDisabled);
+        game = new tf.Game(gameId, 11);
         tf.GameStateMachine.updateToNextGameState(game);
         assert.strictEqual(game.currentState2, tf.GameState2.notStarted);
     });
@@ -503,3 +501,72 @@ describe("GameStateMachineTests.calculateGameState", function() {
         });
     });
 });
+
+describe("gameState calculation - teams", function() {
+    let gameId = "gameId";
+    let numPlayers = 4;
+    let gameRules = {
+        "winningScore": 25, "renegingAllowed": true, "useTeams": { "numTeams": 2, "teamSize": 2 }
+    };
+    var game = new tf.Game(gameId, numPlayers, gameRules);
+
+    setGameToReadyToPlay(game);
+    game.players[2].id = "Player2_id";
+    game.players[3].id = "Player3_id";
+
+    it("populating teams", function() {
+
+        tf.GameStateMachine.updateToNextGameState(game);
+
+        assert.strictEqual(game.currentState2, tf.GameState2.dealCards);
+        assert.strictEqual(game.teams.length, 2);
+        assert.strictEqual(game.teams[0].playerIds.length, 2);
+        assert.strictEqual(game.teams[0].playerIds[0], "Player0_id");
+        assert.strictEqual(game.teams[0].playerIds[1], "Player2_id");
+        assert.strictEqual(game.teams[1].playerIds.length, 2);
+        assert.strictEqual(game.teams[1].playerIds[0], "Player1_id");
+        assert.strictEqual(game.teams[1].playerIds[1], "Player3_id");
+    });
+
+    it("end game when team has won", function() {
+        game.players[0].score = 10;
+        game.players[1].score = 10;
+        game.players[2].score = 10;
+        game.players[3].score = 5;
+
+        game.currentState2 = tf.GameState2.waitingForPlayerMove;
+        game.currentHandInfo.roundFinished = true;
+        game.currentHandInfo.roundPlayerAndCards = [
+            {"player": game.players[0], "card": game.deck.cards.pop() }
+        ];
+
+        tf.GameStateMachine.updateToNextGameState(game);
+
+        assert.strictEqual(game.currentState2, tf.GameState2.roundFinished);
+        assert.strictEqual(game.teams[0].totalScore, 25);
+        assert.strictEqual(game.teams[1].totalScore, 15);
+        assert.strictEqual(game.endOfHandInfo.winningTeamId, game.teams[0].id);
+        assert.strictEqual(game.endOfHandInfo.gameFinished, true);
+    });
+
+    it("do not end game when no team has won", function() {
+        game.players[0].score = 5;
+        game.players[1].score = 5;
+        game.players[2].score = 5;
+        game.players[3].score = 5;
+
+        game.currentState2 = tf.GameState2.waitingForPlayerMove;
+        game.currentHandInfo.roundFinished = true;
+        game.currentHandInfo.roundPlayerAndCards = [
+            {"player": game.players[0], "card": game.deck.cards.pop() }
+        ];
+
+        tf.GameStateMachine.updateToNextGameState(game);
+
+        assert.strictEqual(game.currentState2, tf.GameState2.roundFinished);
+        assert.strictEqual(game.teams[0].totalScore, 15);
+        assert.strictEqual(game.teams[1].totalScore, 10);
+        assert.strictEqual(game.endOfHandInfo.winningTeamId, game.teams[0].id);
+        assert.strictEqual(game.endOfHandInfo.gameFinished, false);
+    });
+})

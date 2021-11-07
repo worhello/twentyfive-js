@@ -39,8 +39,7 @@ function runGame(numPlayers) {
     print("The game will have " + numPlayers + " players");
     selfPlayer = new tf.Player("You", true);
     let gameId = "gameId";
-    let renegingDisabled = false;
-    game = new tf.Game(gameId, numPlayers, renegingDisabled);
+    game = new tf.Game(gameId, numPlayers);
     updateGameState(game);
     tf.GameStateMachine.addPlayer(game, selfPlayer);
     addAis(game);

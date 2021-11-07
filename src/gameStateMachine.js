@@ -106,6 +106,7 @@ class GameStateMachine {
 
     static handleReadyToPlay(gameModule, game) {
         if (game.players.length == game.numberOfPlayers) {
+            GameStateMachine.populateTeamsIfNeeded(game);
             return gameModule.GameState2.dealCards;
         }
         return gameModule.GameState2.waitingForPlayers;
@@ -121,6 +122,18 @@ class GameStateMachine {
         
         dealerIndex = (dealerIndex + 1) % game.players.length;
         game.players[dealerIndex].isDealer = true;
+    }
+
+    static populateTeamsIfNeeded(game) {
+        if (game.gameRules.useTeams === null) {
+            return;
+        }
+
+        var teamNum = 0;
+        for (let player of game.players) {
+            game.teams[teamNum].playerIds.push(player.id);
+            teamNum = (teamNum + 1) % game.gameRules.useTeams.numTeams;
+        }
     }
 
     static handleDealCards(gameModule, game) {
@@ -307,11 +320,13 @@ class GameStateMachine {
         game.endOfHandInfo.nextRoundFirstPlayerId = winningPlayer.id;
         game.players.find(p => p.id == game.endOfHandInfo.nextRoundFirstPlayerId).score += 5;
 
+        GameStateMachine.updateTeamsScores(game);
+
         game.endOfHandInfo.orderedPlayers.length = 0;
         game.endOfHandInfo.orderedPlayers = GameStateMachine.getSortedListOfPlayers(game);
 
         game.currentHandInfo.needMoreCardsDealt = GameStateMachine.mustDealNewCards(game);
-        game.endOfHandInfo.gameFinished = (game.endOfHandInfo.orderedPlayers[0].score >= 25);
+        game.endOfHandInfo.gameFinished = GameStateMachine.isGameFinished(game);
 
         if (game.currentHandInfo.needMoreCardsDealt) {
             game.endOfHandInfo.nextRoundFirstPlayerId = game.endOfHandInfo.orderedPlayers[0].id;
@@ -331,6 +346,32 @@ class GameStateMachine {
         }
         playersCopy.sort(cmpFunc);
         return playersCopy;
+    }
+
+    static updateTeamsScores(game) {
+        if (game.gameRules.useTeams === null) {
+            return;
+        }
+
+        for (var team of game.teams) {
+            team.totalScore = 0;
+            for (let playerId of team.playerIds) {
+                let player = game.players.find(p => p.id == playerId);
+                if (player) {
+                    team.totalScore += player.score;
+                }
+            }
+        }
+    }
+
+    static isGameFinished(game) {
+        if (game.gameRules.useTeams === null) {
+            return game.endOfHandInfo.orderedPlayers[0].score >= game.gameRules.winningScore;
+        }
+
+        const max = game.teams.reduce((prev, current) => (prev.totalScore > current.totalScore) ? prev : current);
+        game.endOfHandInfo.winningTeamId = max.id;
+        return max.totalScore >= game.gameRules.winningScore;
     }
 
     static handleRoundFinished(gameModule, game) {
