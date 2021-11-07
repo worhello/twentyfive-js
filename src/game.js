@@ -34,14 +34,16 @@ class GameHelper {
 }
 
 class GameRules {
-    constructor(winningScore, renegingAllowed) {
+    constructor(winningScore, renegingAllowed, useTeams) {
         this.winningScore = winningScore;
         this.renegingAllowed = renegingAllowed;
+        this.useTeams = useTeams;
     }
 
     static allowedKeys = [
         "winningScore",
-        "renegingAllowed"
+        "renegingAllowed",
+        "useTeams"
     ];
 
     static parseGameRulesObject(gameRulesCandidate) {
@@ -62,7 +64,7 @@ class GameRules {
     }
 
     static buildDefaultRules() {
-        return new GameRules(25, true);
+        return new GameRules(25, true, false);
     }
 }
 

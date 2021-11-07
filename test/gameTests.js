@@ -49,12 +49,12 @@ describe('GameRules tests', function() {
 
     it('invalid config - too many values config', function() {
         assert.throws(() => {
-            let game = new tf.Game(id, numberOfPlayers, { "winningScore": 25, "renegingAllowed": true, "foo": "bar" });
+            let game = new tf.Game(id, numberOfPlayers, { "winningScore": 25, "renegingAllowed": true, "useTeams": false, "foo": "bar" });
         });
     });
 
     it('valid config - too many values config', function() {
-        let game = new tf.Game(id, numberOfPlayers, { "winningScore": 45, "renegingAllowed": false });
+        let game = new tf.Game(id, numberOfPlayers, { "winningScore": 45, "renegingAllowed": false, "useTeams": false });
         assert.strictEqual(game.gameRules.winningScore, 45);
         assert.strictEqual(game.gameRules.renegingAllowed, false);
     });

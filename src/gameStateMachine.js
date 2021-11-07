@@ -106,7 +106,7 @@ class GameStateMachine {
 
     static handleReadyToPlay(gameModule, game) {
         if (game.players.length == game.numberOfPlayers) {
-            GameStateMachine.populateTeamsIfNeeded(gameModule, game);
+            GameStateMachine.populateTeamsIfNeeded(game);
             return gameModule.GameState2.dealCards;
         }
         return gameModule.GameState2.waitingForPlayers;
@@ -124,8 +124,11 @@ class GameStateMachine {
         game.players[dealerIndex].isDealer = true;
     }
 
-    static populateTeamsIfNeeded(gameModule, game) {
-        // TODO
+    static populateTeamsIfNeeded(game) {
+        if (game.gameRules.useTeams == false) {
+            return;
+        }
+        // TODO - implement populating teams into game
     }
 
     static handleDealCards(gameModule, game) {
@@ -339,9 +342,11 @@ class GameStateMachine {
     }
 
     static isGameFinished(game) {
+        if (game.gameRules.useTeams == false) {
+            return game.endOfHandInfo.orderedPlayers[0].score >= game.gameRules.winningScore;
+        }
+
         // TODO expand for teams
-        let winningScore = 25; // TODO move 25 to a constant in the game
-        return game.endOfHandInfo.orderedPlayers[0].score >= winningScore;
     }
 
     static handleRoundFinished(gameModule, game) {
