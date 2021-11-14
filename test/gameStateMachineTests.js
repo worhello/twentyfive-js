@@ -62,6 +62,22 @@ function setGameToCardsDealt(game, onePlayerCanRob) {
     }
 }
 
+function removeAcesFromDeck(game) {
+    var aceIndex = -1;
+    while ((aceIndex = game.deck.cards.findIndex(c => c.value == tf.CardValues.ace)) != -1) {
+        game.deck.cards.splice(aceIndex, 1);
+    }
+    assert.strictEqual(game.deck.cards.length, 48);
+}
+
+function playNextPlayerCardInGame(game, playerId, expectedNewWinningCard) {
+    let player = game.players[game.currentHandInfo.currentPlayerIndex];
+    assert.strictEqual(player.id, playerId);
+
+    let isNewWinningCard = tf.GameStateMachine.aiPlayCard(game, player);
+    assert.strictEqual(isNewWinningCard, expectedNewWinningCard);
+}
+
 describe("GameStateMachineTests.resetDeckIfNeeded", function() {
     let gameId = "gameId";
     let numPlayers = 9;
@@ -93,14 +109,24 @@ describe("GameStateMachineTests.resetDeckIfNeeded", function() {
 });
 
 describe("GameStateMachineTests.calculateGameState", function() {
-    var aiWillRobCardStub = sinon.stub(tf.PlayerLogic, 'aiWillRobCard');
-    aiWillRobCardStub.callsFake(function() { return false; });
-    var shuffleStub = sinon.stub(tf.Helpers, 'shuffle');
-    shuffleStub.callsFake(function(things) {}); //no-op
+    var aiWillRobCardStub;
+    beforeEach(() => {
+        aiWillRobCardStub = sinon.stub(tf.PlayerLogic, 'aiWillRobCard');
+        aiWillRobCardStub.callsFake(function() { return false; });
+        var shuffleStub = sinon.stub(tf.Helpers, 'shuffle');
+        shuffleStub.callsFake(function(things) {}); //no-op
+    });
+
+    afterEach(() => {
+        sinon.restore();
+    });
 
     let gameId = "gameId";
     let numPlayers = 2;
     var game = new tf.Game(gameId, numPlayers);
+    assert.strictEqual(game.gameRules.winningScore, 25);
+    assert.strictEqual(game.gameRules.renegingAllowed, true);
+    assert.strictEqual(game.gameRules.useTeams, null);
 
     beforeEach(() => {
         game = new tf.Game(gameId, numPlayers);
@@ -321,7 +347,6 @@ describe("GameStateMachineTests.calculateGameState", function() {
 
     describe("waitingForPlayerMove loop", () => {
         beforeEach(() => {
-            aiWillRobCardStub.callsFake(function() { return false; });
             setGameToCardsDealt(game, false);
             assert.strictEqual(game.endOfHandInfo.nextRoundFirstPlayerId, "");
             assert.strictEqual(game.players.every((p) => p.score == 0), true);
@@ -333,11 +358,7 @@ describe("GameStateMachineTests.calculateGameState", function() {
         });
 
         let playNextPlayerCard = function(playerId, expectedNewWinningCard) {
-            let player = game.players[game.currentHandInfo.currentPlayerIndex];
-            assert.strictEqual(player.id, playerId);
-
-            let isNewWinningCard = tf.GameStateMachine.aiPlayCard(game, player);
-            assert.strictEqual(isNewWinningCard, expectedNewWinningCard);
+            playNextPlayerCardInGame(game, playerId, expectedNewWinningCard);
         }
 
         let checkScores = function(game, player0Score, player1Score) {
@@ -569,4 +590,90 @@ describe("gameState calculation - teams", function() {
         assert.strictEqual(game.endOfHandInfo.winningTeamId, game.teams[0].id);
         assert.strictEqual(game.endOfHandInfo.gameFinished, false);
     });
-})
+});
+
+describe("gameStateMachine - reneging disabled", function() {
+    beforeEach(() => {
+        var aiWillRobCardStub = sinon.stub(tf.PlayerLogic, 'aiWillRobCard');
+        aiWillRobCardStub.callsFake(function() { return false; });
+        var shuffleStub = sinon.stub(tf.Helpers, 'shuffle');
+        shuffleStub.callsFake(function(things) {});
+    });
+
+    afterEach(() => {
+        sinon.restore();
+    });
+
+    let gameId = "gameId";
+    let numPlayers = 3;
+    let gameRules = {
+        "winningScore": 25, "renegingAllowed": false, "useTeams": null
+    };
+    var game = new tf.Game(gameId, numPlayers, gameRules);
+    removeAcesFromDeck(game);
+
+    // Sort the deck so it's ordered 2,2,2,2,3,3,3,3, ...
+    // This to ensure all players have multiple suits
+    game.deck.cards.sort((a, b) => {
+        if (a.value < b.value) {
+            return -1;
+        }
+        if (a.value > b.value) {
+            return 1;
+        }
+        if (a.suit < b.suit) {
+            return -1;
+        }
+        if (a.suit > b.suit) {
+            return 1;
+        }
+        return 0
+    });
+
+    setGameToCardsDealt(game, true);
+    game.players[2].id = "Player2_id";
+
+    tf.GameStateMachine.updateToNextGameState(game);
+    assert.strictEqual(game.currentState2, tf.GameState2.waitingForPlayerMove);
+    for (let player of game.players) {
+        assert.strictEqual(player.cards.length, 5);
+        assert.strictEqual(player.cards.every(c => c.canPlay == true), true);
+    }
+
+    let playNext = function(playerId, currentPlayerIndex) {
+        playNextPlayerCardInGame(game, playerId, true);
+        tf.GameStateMachine.updateToNextGameState(game);
+        assert.strictEqual(game.currentState2, tf.GameState2.waitingForPlayerMove);
+        assert.strictEqual(game.currentHandInfo.currentPlayerIndex, currentPlayerIndex);
+    }
+
+    describe("one card played", function() {
+        beforeEach(() => {
+            playNext(player0Id, 1);
+        });
+
+        it ("player1 now has some cards disabled", function() {
+            assert.strictEqual(game.players[1].cards.length, 5);
+            assert.strictEqual(game.players[1].cards[0].canPlay, false);
+            assert.strictEqual(game.players[1].cards[1].canPlay, false);
+            assert.strictEqual(game.players[1].cards[2].canPlay, true);
+            assert.strictEqual(game.players[1].cards[3].canPlay, true);
+            assert.strictEqual(game.players[1].cards[4].canPlay, false);
+        });
+    });
+
+    describe("two cards played", function() {
+        beforeEach(() => {
+            playNext(player1Id, 2);
+        });
+
+        it ("player2 now has some cards disabled", function() {
+            assert.strictEqual(game.players[2].cards.length, 5);
+            assert.strictEqual(game.players[2].cards[0].canPlay, false);
+            assert.strictEqual(game.players[2].cards[1].canPlay, true);
+            assert.strictEqual(game.players[2].cards[2].canPlay, true);
+            assert.strictEqual(game.players[2].cards[3].canPlay, false);
+            assert.strictEqual(game.players[2].cards[4].canPlay, false);
+        });
+    });
+});
