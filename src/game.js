@@ -37,22 +37,69 @@ function allKeysPresent(object, keysToTest) {
     return Object.keys(object).sort().join(',') === keysToTest.sort().join(',');
 }
 
+function parseUseTeams(gameRulesCandidate, numberOfPlayers) {
+    if (!allKeysPresent(gameRulesCandidate.useTeams, GameRules.allowedTeamsKeys) || typeof gameRulesCandidate.useTeams.numTeams !== 'number' || typeof gameRulesCandidate.useTeams.teamSize !== 'number') {
+        throw "Invalid teams config";
+    }
+    let totalPlayersRequired = gameRulesCandidate.useTeams.numTeams * gameRulesCandidate.useTeams.teamSize;
+    if (totalPlayersRequired < 4) {
+        throw "Too few players";
+    }
+    else if (totalPlayersRequired > 10) {
+        throw "Too many players needed";
+    }
+    else if (totalPlayersRequired < numberOfPlayers) {
+        throw "Too few players specified in teams config";
+    }
+    else if (totalPlayersRequired > numberOfPlayers) {
+        throw "Not enough players specified for the game";
+    }
+}
+
+function parseCustomRules(gameRulesCandidate, allowedCustomRules) {
+    if (typeof gameRulesCandidate.customRules !== "object" || Array.isArray(gameRulesCandidate.customRules)) {
+        throw "customRules is not null and not an object";
+    }
+
+    if (Object.keys(gameRulesCandidate.customRules).length > Object.keys(allowedCustomRules).length) {
+        throw "too many keys in customRules";
+    }
+
+    for (let customRuleCandidate of Object.keys(gameRulesCandidate.customRules)) {
+        if (!Object.keys(allowedCustomRules).some(allowed => allowed == customRuleCandidate)) {
+            throw "unsupported key in customRules";
+        }
+
+        if (typeof gameRulesCandidate.customRules[customRuleCandidate] != allowedCustomRules[customRuleCandidate]) {
+            throw "key of unsupported type in customRules";
+        }
+    }
+
+
+}
+
 class GameRules {
-    constructor(winningScore, renegingAllowed, useTeams) {
+    constructor(winningScore, renegingAllowed, useTeams, customRules) {
         this.winningScore = winningScore;
         this.renegingAllowed = renegingAllowed;
         this.useTeams = useTeams;
+        this.customRules = customRules;
     }
 
     static allowedKeys = [
         "winningScore",
         "renegingAllowed",
-        "useTeams"
+        "useTeams",
+        "customRules"
     ];
 
     static allowedTeamsKeys = [
         "numTeams", "teamSize"
     ];
+
+    static allowedCustomRules = {
+        "dealerBonusIfTrumpIsAce": "boolean"
+    }
 
     static parseGameRulesObject(gameRulesCandidate, numberOfPlayers) {
         if (gameRulesCandidate === undefined) {
@@ -64,22 +111,11 @@ class GameRules {
         }
 
         if (gameRulesCandidate.useTeams !== null) {
-            if (!allKeysPresent(gameRulesCandidate.useTeams, GameRules.allowedTeamsKeys) || typeof gameRulesCandidate.useTeams.numTeams !== 'number' || typeof gameRulesCandidate.useTeams.teamSize !== 'number') {
-                throw "Invalid teams config";
-            }
-            let totalPlayersRequired = gameRulesCandidate.useTeams.numTeams * gameRulesCandidate.useTeams.teamSize;
-            if (totalPlayersRequired < 4) {
-                throw "Too few players";
-            }
-            else if (totalPlayersRequired > 10) {
-                throw "Too many players needed";
-            }
-            else if (totalPlayersRequired < numberOfPlayers) {
-                throw "Too few players specified in teams config";
-            }
-            else if (totalPlayersRequired > numberOfPlayers) {
-                throw "Not enough players specified for the game";
-            }
+            parseUseTeams(gameRulesCandidate, numberOfPlayers);
+        }
+
+        if (gameRulesCandidate.customRules !== null) {
+            parseCustomRules(gameRulesCandidate, GameRules.allowedCustomRules);
         }
 
         var rules = GameRules.buildDefaultRules();
@@ -91,7 +127,7 @@ class GameRules {
     }
 
     static buildDefaultRules() {
-        return new GameRules(25, true, null);
+        return new GameRules(25, true, null, null);
     }
 }
 
