@@ -527,7 +527,7 @@ describe("gameState calculation - teams", function() {
     let gameId = "gameId";
     let numPlayers = 4;
     let gameRules = {
-        "winningScore": 25, "renegingAllowed": true, "useTeams": { "numTeams": 2, "teamSize": 2 }
+        "winningScore": 25, "renegingAllowed": true, "useTeams": { "numTeams": 2, "teamSize": 2 }, "customRules": null
     };
     var game = new tf.Game(gameId, numPlayers, gameRules);
 
@@ -607,7 +607,7 @@ describe("gameStateMachine - reneging disabled", function() {
     let gameId = "gameId";
     let numPlayers = 3;
     let gameRules = {
-        "winningScore": 25, "renegingAllowed": false, "useTeams": null
+        "winningScore": 25, "renegingAllowed": false, "useTeams": null, "customRules": null
     };
     var game = new tf.Game(gameId, numPlayers, gameRules);
     removeAcesFromDeck(game);
