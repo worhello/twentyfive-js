@@ -156,11 +156,11 @@ class GameStateMachine {
         game.trumpCard = new (GameStateMachineModuleHelper.getTrumpCardModule()).TrumpCard();
         game.trumpCard.card = game.deck.cards.shift();
 
-        console.log(game.gameRules.customRules);
         if (game.gameRules.customRules && game.gameRules.customRules.dealerBonusIfTrumpIsAce == true) {
-            console.log("went into custom rule");
-            let dealer = game.players.find(p => p.isDealer == true);
-            GameStateMachine.incrementScore(dealer);
+            if ((GameStateMachineModuleHelper.getGameLogicModule()).isAceOfTrumps(game.trumpCard.card, game.trumpCard)) {
+                let dealer = game.players.find(p => p.isDealer == true);
+                GameStateMachine.incrementScore(dealer);
+            }
         }
 
         game.currentHandInfo.needMoreCardsDealt = false;
