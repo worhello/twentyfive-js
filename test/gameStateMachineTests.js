@@ -728,6 +728,14 @@ describe("gameStateMachine - custom rules: dealerBonusIfTrumpIsAce", function() 
             assert.strictEqual(game.players[0].score, 0);
             assert.strictEqual(game.players[1].score, 5);
         });
+        it("player1 is dealer - trump card is not ace - extra score not applied", function() {
+            assert.strictEqual(game.deck.cards[10].value == tf.CardValues.ace, false);
+            setGameToCardsDealt(game, true);
+            assert.strictEqual(game.players[0].isDealer, false);
+            assert.strictEqual(game.players[1].isDealer, true);
+            assert.strictEqual(game.players[0].score, 0);
+            assert.strictEqual(game.players[1].score, 0);
+        });
     });
     describe("dealerBonusIfTrumpIsAce = false", function() {
         let gameRules = {
