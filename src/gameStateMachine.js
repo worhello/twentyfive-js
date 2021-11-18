@@ -95,6 +95,10 @@ class GameStateMachine {
         return true;
     }
 
+    static incrementScore(player) {
+        player.score += 5;
+    }
+
     static handleWaitingForPlayers(gameModule, game) {
         if (game.players.length == game.numberOfPlayers) {
             GameStateMachine.rotateDealer(game);
@@ -151,6 +155,13 @@ class GameStateMachine {
 
         game.trumpCard = new (GameStateMachineModuleHelper.getTrumpCardModule()).TrumpCard();
         game.trumpCard.card = game.deck.cards.shift();
+
+        console.log(game.gameRules.customRules);
+        if (game.gameRules.customRules && game.gameRules.customRules.dealerBonusIfTrumpIsAce == true) {
+            console.log("went into custom rule");
+            let dealer = game.players.find(p => p.isDealer == true);
+            GameStateMachine.incrementScore(dealer);
+        }
 
         game.currentHandInfo.needMoreCardsDealt = false;
 
@@ -324,7 +335,7 @@ class GameStateMachine {
         let winningPlayer = game.currentHandInfo.roundPlayerAndCards.find(pAC => pAC.card == winningCard).player;
 
         game.endOfHandInfo.nextRoundFirstPlayerId = winningPlayer.id;
-        game.players.find(p => p.id == game.endOfHandInfo.nextRoundFirstPlayerId).score += 5;
+        GameStateMachine.incrementScore(game.players.find(p => p.id == game.endOfHandInfo.nextRoundFirstPlayerId));
 
         GameStateMachine.updateTeamsScores(game);
 

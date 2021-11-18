@@ -677,3 +677,74 @@ describe("gameStateMachine - reneging disabled", function() {
         });
     });
 });
+
+describe("gameStateMachine - custom rules: dealerBonusIfTrumpIsAce", function() {
+    beforeEach(() => {
+        var aiWillRobCardStub = sinon.stub(tf.PlayerLogic, 'aiWillRobCard');
+        aiWillRobCardStub.callsFake(function() { return false; });
+        var shuffleStub = sinon.stub(tf.Helpers, 'shuffle');
+        shuffleStub.callsFake(function(things) {});
+    });
+
+    afterEach(() => {
+        sinon.restore();
+    });
+
+    let sortDeckFunc = (deck) => {
+        deck.cards.sort((a, b) => {
+            if (a.suit < b.suit) {
+                return 1;
+            }
+            if (a.suit > b.suit) {
+                return -1;
+            }
+            if (a.value < b.value) {
+                return 1;
+            }
+            if (a.value > b.value) {
+                return -1;
+            }
+            return 0
+        });
+    }
+
+    let gameId = "gameId";
+    let numPlayers = 2;
+
+    describe("dealerBonusIfTrumpIsAce = true", function() {
+        let gameRules = {
+            "winningScore": 25, "renegingAllowed": false, "useTeams": null, "customRules": { "dealerBonusIfTrumpIsAce": true }
+        };
+        var game = new tf.Game(gameId, numPlayers, gameRules);
+        sortDeckFunc(game.deck);
+
+        it("player1 is dealer - trump card is ace - extra score applied", function() {
+            game.deck.cards.shift();
+            game.deck.cards.shift();
+            assert.strictEqual(game.deck.cards[10].value, tf.CardValues.ace);
+            setGameToCardsDealt(game, true);
+            assert.strictEqual(game.players[0].isDealer, false);
+            assert.strictEqual(game.players[1].isDealer, true);
+            assert.strictEqual(game.players[0].score, 0);
+            assert.strictEqual(game.players[1].score, 5);
+        });
+    });
+    describe("dealerBonusIfTrumpIsAce = false", function() {
+        let gameRules = {
+            "winningScore": 25, "renegingAllowed": false, "useTeams": null, "customRules": { "dealerBonusIfTrumpIsAce": false }
+        };
+        var game = new tf.Game(gameId, numPlayers, gameRules);
+        sortDeckFunc(game.deck);
+
+        it("player1 is dealer - trump card is ace - extra score not applied", function() {
+            game.deck.cards.shift();
+            game.deck.cards.shift();
+            assert.strictEqual(game.deck.cards[10].value, tf.CardValues.ace);
+            setGameToCardsDealt(game, true);
+            assert.strictEqual(game.players[0].isDealer, false);
+            assert.strictEqual(game.players[1].isDealer, true);
+            assert.strictEqual(game.players[0].score, 0);
+            assert.strictEqual(game.players[1].score, 0);
+        });
+    });
+});
