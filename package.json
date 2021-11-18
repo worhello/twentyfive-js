@@ -1,6 +1,6 @@
 {
   "name": "twentyfive",
-  "version": "0.9.1",
+  "version": "1.0.0",
   "license": "MIT",
   "dependencies": {
     "assert": "latest",
