@@ -230,7 +230,7 @@ class GameStateMachine {
     static fillWithAIs(game) {
         let numAiPlayersNeeded = game.numberOfPlayers - game.players.length;
         for (var i = 0; i < numAiPlayersNeeded; i++) {
-            GameStateMachine.addPlayer(game, (GameStateMachineModuleHelper.getPlayerModule()).buildAiPlayer());
+            GameStateMachine.addPlayer(game, (GameStateMachineModuleHelper.getPlayerModule()).buildAiPlayer(game.id));
         }
     }
 

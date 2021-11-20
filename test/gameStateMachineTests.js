@@ -322,6 +322,11 @@ describe("GameStateMachineTests.calculateGameState", function() {
         it ("all AI players", function() {
             tf.GameStateMachine.fillWithAIs(game);
 
+            for (let player of game.players) {
+                assert.strictEqual(player.id.startsWith("playerId_AI_Player"), true);
+                assert.strictEqual(player.id.endsWith("_" + gameId), true);
+            }
+
             tf.GameStateMachine.markAllPlayersAsNotReady(game);
             game.currentState2 = tf.GameState2.waitingForPlayersToMarkAsReady;
 
