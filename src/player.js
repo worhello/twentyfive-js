@@ -61,8 +61,9 @@ class Player {
 }
 
 var aiPlayerNum = 1;
-function buildAiPlayer() {
+function buildAiPlayer(gameId) {
     var p = new Player("AI_Player" + aiPlayerNum);
+    p.id = p.id + "_" + gameId;
     p.isAi = true;
     aiPlayerNum++;
     return p;
