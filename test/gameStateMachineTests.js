@@ -351,6 +351,12 @@ describe("GameStateMachineTests.calculateGameState", function() {
     });
 
     describe("waitingForPlayerMove loop", () => {
+        let checkCurrentDealer = (game, expectedDealerId) => {
+            for (let player of game.players) {
+                assert.strictEqual(player.isDealer, player.id == expectedDealerId);
+            }
+        }
+
         beforeEach(() => {
             setGameToCardsDealt(game, false);
             assert.strictEqual(game.endOfHandInfo.nextRoundFirstPlayerId, "");
@@ -360,6 +366,7 @@ describe("GameStateMachineTests.calculateGameState", function() {
             assert.strictEqual(game.currentState2, tf.GameState2.waitingForPlayerMove);
             assert.strictEqual(game.currentHandInfo.currentPlayerIndex, 0);
             assert.strictEqual(game.currentHandInfo.needMoreCardsDealt, false);
+            checkCurrentDealer(game, player1Id);
         });
 
         let playNextPlayerCard = function(playerId, expectedNewWinningCard) {
@@ -400,6 +407,7 @@ describe("GameStateMachineTests.calculateGameState", function() {
             tf.GameStateMachine.updateToNextGameState(game);
             assert.strictEqual(game.currentState2, tf.GameState2.roundFinished);
             checkScores(game, 0, 5);
+            checkCurrentDealer(game, player1Id);
 
             tf.GameStateMachine.updateToNextGameState(game);
             assert.strictEqual(game.currentState2, tf.GameState2.waitingForPlayerMove);
@@ -412,6 +420,7 @@ describe("GameStateMachineTests.calculateGameState", function() {
             tf.GameStateMachine.updateToNextGameState(game);
             assert.strictEqual(game.currentState2, tf.GameState2.roundFinished);
             checkScores(game, 0, 10);
+            checkCurrentDealer(game, player1Id);
 
             tf.GameStateMachine.updateToNextGameState(game);
             assert.strictEqual(game.currentState2, tf.GameState2.waitingForPlayerMove);
@@ -424,6 +433,7 @@ describe("GameStateMachineTests.calculateGameState", function() {
             tf.GameStateMachine.updateToNextGameState(game);
             assert.strictEqual(game.currentState2, tf.GameState2.roundFinished);
             checkScores(game, 0, 15);
+            checkCurrentDealer(game, player1Id);
 
             tf.GameStateMachine.updateToNextGameState(game);
             assert.strictEqual(game.currentState2, tf.GameState2.waitingForPlayerMove);
@@ -436,6 +446,7 @@ describe("GameStateMachineTests.calculateGameState", function() {
             tf.GameStateMachine.updateToNextGameState(game);
             assert.strictEqual(game.currentState2, tf.GameState2.roundFinished);
             checkScores(game, 5, 15);
+            checkCurrentDealer(game, player1Id);
 
             tf.GameStateMachine.updateToNextGameState(game);
             assert.strictEqual(game.currentState2, tf.GameState2.waitingForPlayerMove);
@@ -448,10 +459,12 @@ describe("GameStateMachineTests.calculateGameState", function() {
             tf.GameStateMachine.updateToNextGameState(game);
             assert.strictEqual(game.currentState2, tf.GameState2.roundFinished);
             checkScores(game, 5, 20);
+            checkCurrentDealer(game, player1Id);
             assert.strictEqual(game.currentHandInfo.needMoreCardsDealt, true);
 
             tf.GameStateMachine.updateToNextGameState(game);
             assert.strictEqual(game.currentState2, tf.GameState2.waitingForPlayersToMarkAsReady);
+            checkCurrentDealer(game, player0Id);
 
             tf.GameStateMachine.updateToNextGameState(game); // we have all AIs in this game
             assert.strictEqual(game.currentState2, tf.GameState2.dealCards);
@@ -478,6 +491,7 @@ describe("GameStateMachineTests.calculateGameState", function() {
             tf.GameStateMachine.updateToNextGameState(game);
             assert.strictEqual(game.currentState2, tf.GameState2.roundFinished);
             checkScores(game, 10, 20);
+            checkCurrentDealer(game, player0Id);
 
             tf.GameStateMachine.updateToNextGameState(game);
             assert.strictEqual(game.currentState2, tf.GameState2.waitingForPlayerMove);
@@ -490,6 +504,7 @@ describe("GameStateMachineTests.calculateGameState", function() {
             tf.GameStateMachine.updateToNextGameState(game);
             assert.strictEqual(game.currentState2, tf.GameState2.roundFinished);
             checkScores(game, 15, 20);
+            checkCurrentDealer(game, player0Id);
             assert.strictEqual(game.endOfHandInfo.gameFinished, false);
 
             tf.GameStateMachine.updateToNextGameState(game);
@@ -503,6 +518,7 @@ describe("GameStateMachineTests.calculateGameState", function() {
             tf.GameStateMachine.updateToNextGameState(game);
             assert.strictEqual(game.currentState2, tf.GameState2.roundFinished);
             checkScores(game, 20, 20);
+            checkCurrentDealer(game, player0Id);
             assert.strictEqual(game.endOfHandInfo.gameFinished, false);
 
             tf.GameStateMachine.updateToNextGameState(game);
@@ -516,6 +532,7 @@ describe("GameStateMachineTests.calculateGameState", function() {
             tf.GameStateMachine.updateToNextGameState(game);
             assert.strictEqual(game.currentState2, tf.GameState2.roundFinished);
             checkScores(game, 25, 20);
+            checkCurrentDealer(game, player0Id);
             assert.strictEqual(game.endOfHandInfo.gameFinished, true);
 
             tf.GameStateMachine.updateToNextGameState(game);

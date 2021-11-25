@@ -398,13 +398,13 @@ class GameStateMachine {
 
         // reset game state
         GameStateMachine.rotatePlayers(game);
-        GameStateMachine.rotateDealer(game);
         game.currentHandInfo.roundPlayerAndCards.length = 0;
         game.currentHandInfo.currentPlayerIndex = 0;
         game.currentHandInfo.currentWinningPlayerAndCard = {};
         game.currentHandInfo.roundFinished = false;
 
         if (game.currentHandInfo.needMoreCardsDealt) {
+            GameStateMachine.rotateDealer(game);
             GameStateMachine.markAllPlayersAsNotReady(game);
             return gameModule.GameState2.waitingForPlayersToMarkAsReady;
         }
