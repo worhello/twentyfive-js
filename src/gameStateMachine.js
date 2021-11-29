@@ -117,15 +117,19 @@ class GameStateMachine {
     }
 
     static rotateDealer(game) {
-        var dealerIndex = game.players.findIndex(p => p.isDealer == true);
+        var dealerIndex = GameStateMachine.getDealerIndex(game);
         if (dealerIndex == -1) {
             dealerIndex = game.players.length - 2;
         } else {
             game.players[dealerIndex].isDealer = false;
         }
-        
-        dealerIndex = (dealerIndex + 1) % game.players.length;
+
+        dealerIndex = GameStateMachine.getNextPlayerIndex(game, dealerIndex);
         game.players[dealerIndex].isDealer = true;
+    }
+
+    static getNextPlayerIndex(game, currentPlayerIndex) {
+        return (currentPlayerIndex + 1) % game.players.length;
     }
 
     static populateTeamsIfNeeded(game) {
@@ -178,11 +182,15 @@ class GameStateMachine {
         return gameModule.GameState2.waitingForPlayerMove;
     }
 
+    static getDealerIndex(game) {
+        return game.players.findIndex(p => p.isDealer == true);
+    }
+
     static updatePlayerCanRob(game) {
         game.roundRobbingInfo.playerCanRobIndex = -1;
 
         // first check dealer
-        let dealerIndex = game.players.findIndex(p => p.isDealer == true);
+        let dealerIndex = GameStateMachine.getDealerIndex(game);
         let dealer = game.players[dealerIndex];
         let dealerNeedsNotification = GameStateMachine.playerCanRobTrumpCard(game, dealer);
         if (dealerNeedsNotification) {
@@ -346,7 +354,9 @@ class GameStateMachine {
         game.endOfHandInfo.gameFinished = GameStateMachine.isGameFinished(game);
 
         if (game.currentHandInfo.needMoreCardsDealt) {
-            game.endOfHandInfo.nextRoundFirstPlayerId = game.endOfHandInfo.orderedPlayers[0].id;
+            let dealerIndex = GameStateMachine.getDealerIndex(game);
+            let nextPlayerIndex = GameStateMachine.getNextPlayerIndex(game, dealerIndex);
+            game.endOfHandInfo.nextRoundFirstPlayerId = game.players[nextPlayerIndex].id;
         }
     }
 
