@@ -306,9 +306,11 @@ class GameStateMachine {
         game.currentHandInfo.roundFinished = game.currentHandInfo.currentPlayerIndex == game.players.length;
 
         if (game.gameRules.renegingAllowed == false) {
-            let playedCards = game.currentHandInfo.roundPlayerAndCards.map(pac => pac.card);
-            let nextPlayer = game.players[game.currentHandInfo.currentPlayerIndex];
-            GameStateMachineModuleHelper.getGameLogicModule().updatePlayerCardsEnabledState(playedCards, nextPlayer.cards, game.trumpCard);
+            if (game.currentHandInfo.currentPlayerIndex < game.players.length) {
+                let playedCards = game.currentHandInfo.roundPlayerAndCards.map(pac => pac.card);
+                let nextPlayer = game.players[game.currentHandInfo.currentPlayerIndex];
+                GameStateMachineModuleHelper.getGameLogicModule().updatePlayerCardsEnabledState(playedCards, nextPlayer.cards, game.trumpCard);
+            }
         }
 
         return isNewWinningCard;

@@ -647,6 +647,10 @@ describe("gameStateMachine - reneging disabled", function() {
             playNext(player1Id, 2);
         });
 
+        // afterEach(() => {
+        //     // tf.GameStateMachine.updateToNextGameState(game);
+        // });
+
         it ("player2 now has some cards disabled", function() {
             assert.strictEqual(game.players[2].cards.length, 5);
             assert.strictEqual(game.players[2].cards[0].canPlay, false);
@@ -654,6 +658,8 @@ describe("gameStateMachine - reneging disabled", function() {
             assert.strictEqual(game.players[2].cards[2].canPlay, true);
             assert.strictEqual(game.players[2].cards[3].canPlay, false);
             assert.strictEqual(game.players[2].cards[4].canPlay, false);
+
+            playNextPlayerCardInGame(game, "Player2_id", true);
         });
     });
 });
