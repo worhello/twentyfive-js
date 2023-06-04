@@ -8,12 +8,21 @@ function isAlphaNumeric(str) {
       code = str.charCodeAt(i);
       if (!(code > 47 && code < 58) && // numeric (0-9)
           !(code > 64 && code < 91) && // upper alpha (A-Z)
-          !(code > 96 && code < 123)) { // lower alpha (a-z)
+          !(code > 96 && code < 123) && // lower alpha (a-z)
+          !isSpaceCharCode(code)) { // space
         return false;
       }
     }
     return true;
-  }
+}
+
+function isSpaceCharCode(code) {
+    return code == 32;
+}
+
+function startsOrEndsWithSpace(str) {
+    return isSpaceCharCode(str.charCodeAt(0)) || isSpaceCharCode(str.charCodeAt(str.length - 1));
+}
 
 class Helpers {
     static shuffle(things) {
@@ -36,6 +45,10 @@ class Helpers {
         }
 
         if (!isAlphaNumeric(nameCandidate)) {
+            return false;
+        }
+
+        if (startsOrEndsWithSpace(nameCandidate)) {
             return false;
         }
 
