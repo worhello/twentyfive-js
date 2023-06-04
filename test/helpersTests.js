@@ -37,4 +37,16 @@ describe("isValidName tests", function() {
     it("mix of alphanumeric and non-alphanumeric string", function() {
         assert.strictEqual(helpers.isValidName("abc!"), false);
     });
+    it("alphanumeric string with string in middle", function() {
+        assert.strictEqual(helpers.isValidName("abc def"), true);
+    });
+    it("alphanumeric string with string at start", function() {
+        assert.strictEqual(helpers.isValidName(" abc"), false);
+    });
+    it("alphanumeric string with string at end", function() {
+        assert.strictEqual(helpers.isValidName("abc "), false);
+    });
+    it("alphanumeric string with string at start and end", function() {
+        assert.strictEqual(helpers.isValidName(" abc "), false);
+    });
 });
