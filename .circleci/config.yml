@@ -3,5 +3,11 @@ orbs:
   node: circleci/node@2.0.2
 workflows:
     build-and-test:
-      jobs:
-        - node/test
+      executor: node/default # use the default executor defined within the orb
+    steps:
+      - checkout
+      - node/install-packages:
+          pkg-manager: npm
+      - run:
+          command: npm run test
+          name: Run tests
