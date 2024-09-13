@@ -3,9 +3,6 @@
   "version": "1.0.7",
   "license": "MIT",
   "dependencies": {
-    "assert": "latest",
-    "mocha": "latest",
-    "sinon": "latest"
   },
   "scripts": {
     "test": "mocha test/*.js"
@@ -24,5 +21,9 @@
     "url": "https://github.com/worhello/twentyfive-js/issues"
   },
   "homepage": "https://github.com/worhello/twentyfive-js#readme",
-  "devDependencies": {}
+  "devDependencies": {
+    "assert": "latest",
+    "mocha": "latest",
+    "sinon": "latest"
+  }
 }
