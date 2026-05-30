@@ -2,8 +2,6 @@
   "name": "twentyfive",
   "version": "1.0.7",
   "license": "MIT",
-  "dependencies": {
-  },
   "scripts": {
     "test": "mocha test/*.js"
   },
@@ -23,7 +21,7 @@
   "homepage": "https://github.com/worhello/twentyfive-js#readme",
   "devDependencies": {
     "assert": "latest",
-    "mocha": "latest",
+    "mocha": "^11.3.0",
     "sinon": "latest"
   }
 }
